@@ -5,21 +5,20 @@ PdfBinder GUI版
 PDFファイルの結合とページ抜き取りを直感的なGUIで操作できます
 """
 
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+# Windows-only: 日本語ロケール（CP932）を優先
+import locale
 import os
-import sys
 import platform
+import sys
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+
 import PyPDF2
 
-# Windows環境での文字化け対策
-if platform.system() == "Windows":
-    import locale
-
-    try:
-        locale.setlocale(locale.LC_ALL, "Japanese_Japan.932")
-    except:
-        pass
+try:
+    locale.setlocale(locale.LC_ALL, "Japanese_Japan.932")
+except:
+    pass
 
 
 class PDFManager:
@@ -29,19 +28,11 @@ class PDFManager:
         self.root.geometry("800x600")
         self.root.configure(bg="#f0f0f0")
 
-        # Windows環境での文字化け対策
-        if platform.system() == "Windows":
-            # システムのデフォルトフォントを使用
-            self.default_font = ("Yu Gothic UI", 9)
-            self.title_font = ("Yu Gothic UI", 18, "bold")
-            self.header_font = ("Yu Gothic UI", 12, "bold")
-            self.button_font = ("Yu Gothic UI", 10, "bold")
-        else:
-            # Linux/Mac用フォント
-            self.default_font = ("Arial", 9)
-            self.title_font = ("Arial", 18, "bold")
-            self.header_font = ("Arial", 12, "bold")
-            self.button_font = ("Arial", 10, "bold")
+        # Windows専用フォント設定
+        self.default_font = ("Yu Gothic UI", 9)
+        self.title_font = ("Yu Gothic UI", 18, "bold")
+        self.header_font = ("Yu Gothic UI", 12, "bold")
+        self.button_font = ("Yu Gothic UI", 10, "bold")
 
         # 現在のディレクトリ
         self.current_dir = os.getcwd()

@@ -14,7 +14,7 @@
 
 ## 2. 必要なライブラリのインストール
 コマンドプロンプトまたはPowerShellで以下を実行：
-```bash
+```powershell
 pip install PyPDF2 pyinstaller
 ```
 
@@ -23,7 +23,7 @@ pip install PyPDF2 pyinstaller
 
 ## 4. EXEファイルの作成
 ソースファイルがあるフォルダで以下を実行：
-```bash
+```powershell
 # 基本のビルド
 pyinstaller --onefile --windowed --name "PdfBinder" pdfbinder_gui.py
 
@@ -43,12 +43,12 @@ pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath b
 - PCを再起動してから再試行
 
 ### pipが認識されない
-```bash
+```powershell
 python -m pip install PyPDF2 pyinstaller
 ```
 
 ### ビルドエラーが発生する
-```bash
+```powershell
 # 仮想環境を作成して実行
 python -m venv venv
 venv\Scripts\activate

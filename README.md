@@ -26,16 +26,22 @@ PDFファイルの結合とページ抜き取りを簡単な操作で行える�
 3. **受け取った側はPythonのインストール不要**
 4. **Windows 11対応・文字化け対策済み**
 
-### 🔧 開発者向け
-```bash
-# 必要なライブラリをインストール（Windows環境）
+### 🔧 開発者向け（Windows）
+Windows 上での開発・テスト手順（最小）:
+
+```powershell
+# 仮想環境の作成（任意）
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# 必要なライブラリをインストール
 pip install PyPDF2 pyinstaller
 
-# GUIアプリケーションを直接実行
+# GUI を直接実行
 python pdfbinder_gui.py
 
-# EXEファイル作成（Windows環境のみ）
-build_exe_windows.bat
+# EXE を作成
+.\build_exe_windows.bat
 ```
 
 ### 📦 配布パッケージ
@@ -73,11 +79,11 @@ build_exe_windows.bat
 
 ## ページ指定の例
 
-| 入力例 | 説明 |
-|--------|------|
-| `1` | 1ページ目のみ |
-| `1,3,5` | 1、3、5ページ目 |
-| `1-5` | 1ページ目から5ページ目まで |
+| 入力例        | 説明                            |
+| ------------- | ------------------------------- |
+| `1`           | 1ページ目のみ                   |
+| `1,3,5`       | 1、3、5ページ目                 |
+| `1-5`         | 1ページ目から5ページ目まで      |
 | `1-3,7,10-12` | 1-3ページ、7ページ、10-12ページ |
 
 ## 注意事項
@@ -153,7 +159,7 @@ build_exe_windows.bat
 - **PDFライブラリ**: PyPDF2
 - **配布形式**: PyInstaller（単一実行ファイル）
 - **文字エンコーディング**: UTF-8 (Windows対応)
-- **対応フォント**: Yu Gothic UI (Windows) / Arial (その他)
+-- **対応フォント**: Yu Gothic UI (Windows)
 
 ## 更新履歴
 
