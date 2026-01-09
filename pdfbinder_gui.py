@@ -38,11 +38,18 @@ class PDFManager:
         self.root.geometry("800x600")
         self.root.configure(bg="#f0f0f0")
 
-        # Windows専用フォント設定
-        self.default_font = ("Yu Gothic UI", 9)
-        self.title_font = ("Yu Gothic UI", 18, "bold")
-        self.header_font = ("Yu Gothic UI", 12, "bold")
-        self.button_font = ("Yu Gothic UI", 10, "bold")
+        # Modernized font and color scheme
+        self.default_font = ("Segoe UI", 10)
+        self.title_font = ("Segoe UI", 18, "bold")
+        self.header_font = ("Segoe UI", 12, "bold")
+        self.button_font = ("Segoe UI", 10, "bold")
+
+        # Color palette
+        self.bg_color = "#f8f9fa"
+        self.card_color = "#ffffff"
+        self.primary = "#0d6efd"
+        self.accent = "#198754"
+        self.danger = "#dc3545"
 
         # 現在のディレクトリ
         self.current_dir = os.getcwd()
@@ -53,7 +60,7 @@ class PDFManager:
     def create_widgets(self):
         """ウィジェットを作成"""
         # メインタイトル
-        title_frame = tk.Frame(self.root, bg="#2c3e50", height=60)
+        title_frame = tk.Frame(self.root, bg=self.primary, height=60)
         title_frame.pack(fill="x", padx=10, pady=(10, 0))
         title_frame.pack_propagate(False)
 
@@ -62,74 +69,55 @@ class PDFManager:
             text="PdfBinder",
             font=self.title_font,
             fg="white",
-            bg="#2c3e50",
+            bg=self.primary,
         )
         title_label.pack(expand=True)
 
-        # ディレクトリ選択フレーム
-        dir_frame = tk.Frame(self.root, bg="#f0f0f0")
-        dir_frame.pack(fill="x", padx=10, pady=10)
+        # Top toolbar: only file-add button (no folder selection)
+        toolbar = tk.Frame(self.root, bg=self.bg_color)
+        toolbar.pack(fill="x", padx=10, pady=10)
 
         tk.Label(
-            dir_frame, text="作業フォルダ:", font=self.default_font, bg="#f0f0f0"
+            toolbar,
+            text="PdfBinder",
+            font=self.header_font,
+            bg=self.bg_color,
+            fg="#212529",
         ).pack(side="left")
 
-        self.dir_var = tk.StringVar(value=self.current_dir)
-        dir_entry = tk.Entry(
-            dir_frame,
-            textvariable=self.dir_var,
-            font=self.default_font,
-            state="readonly",
-        )
-        dir_entry.pack(side="left", fill="x", expand=True, padx=(10, 5))
-
         tk.Button(
-            dir_frame,
-            text="フォルダ選択",
-            command=self.select_directory,
-            bg="#3498db",
-            fg="white",
-            font=self.default_font,
-            relief="flat",
-            padx=20,
-        ).pack(side="right")
-
-        tk.Button(
-            dir_frame,
+            toolbar,
             text="ファイル追加",
             command=self.add_files_dialog,
-            bg="#2980b9",
+            bg=self.primary,
             fg="white",
-            font=self.default_font,
+            font=self.button_font,
             relief="flat",
             padx=12,
-        ).pack(side="right", padx=(0, 5))
+        ).pack(side="right")
 
-        tk.Button(
-            dir_frame,
-            text="フォルダ内のファイルを1つ選択",
-            command=self.select_file_in_directory,
-            bg="#16a085",
-            fg="white",
-            font=self.default_font,
-            relief="flat",
-            padx=12,
-        ).pack(side="right", padx=(0, 5))
+        tk.Label(
+            toolbar,
+            text="ファイルをドラッグ＆ドロップするか、上の「ファイル追加」から選択してください。",
+            font=("Segoe UI", 9),
+            bg=self.bg_color,
+            fg="#495057",
+        ).pack(side="right", padx=(0, 10))
 
         # メインコンテンツエリア
         main_frame = tk.Frame(self.root, bg="#f0f0f0")
         main_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         # 左側：ファイルリスト
-        left_frame = tk.Frame(main_frame, bg="#f0f0f0")
+        left_frame = tk.Frame(main_frame, bg=self.bg_color)
         left_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
 
         tk.Label(
-            left_frame, text="PDFファイル一覧", font=self.header_font, bg="#f0f0f0"
+            left_frame, text="PDFファイル一覧", font=self.header_font, bg=self.bg_color
         ).pack(anchor="w", pady=(0, 5))
 
         # ファイルリストボックス
-        list_frame = tk.Frame(left_frame)
+        list_frame = tk.Frame(left_frame, bg=self.card_color, bd=0)
         list_frame.pack(fill="both", expand=True)
 
         scrollbar = tk.Scrollbar(list_frame)
@@ -140,11 +128,9 @@ class PDFManager:
             selectmode="extended",
             font=self.default_font,
             yscrollcommand=scrollbar.set,
-            bg="white",
+            bg=self.card_color,
             relief="flat",
-            borderwidth=1,
-            highlightthickness=1,
-            highlightcolor="#3498db",
+            borderwidth=0,
         )
         self.file_listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.file_listbox.yview)
@@ -261,22 +247,11 @@ class PDFManager:
         help_text.insert(
             "1.0",
             "📖 使い方:\n\n"
-            "1. 作業フォルダを選択\n"
-            "2. PDFファイル一覧から操作対象を確認\n"
-            "3. 実行したい操作を選択\n"
-            "4. 画面の指示に従って操作\n\n"
-            "💡 複数ファイル選択: Ctrlキーを押しながらクリック",
+            "• ファイルをこのウィンドウにドラッグ＆ドロップ、または上の「ファイル追加」から選択してください。\n"
+            "• 追加したPDFは作業ディレクトリにコピーされ、一覧に表示されます。\n\n"
+            "💡 複数ファイル追加: ファイル選択ダイアログで複数選択可能",
         )
         help_text.config(state="disabled")
-
-    def select_directory(self):
-        """ディレクトリを選択"""
-        directory = filedialog.askdirectory(initialdir=self.current_dir)
-        if directory:
-            self.current_dir = directory
-            self.dir_var.set(directory)
-            os.chdir(directory)
-            self.refresh_file_list()
 
     def add_files_dialog(self):
         """ファイル選択ダイアログでPDFを追加（複数選択可）"""
@@ -309,37 +284,7 @@ class PDFManager:
 
         self.refresh_file_list()
 
-    def select_file_in_directory(self):
-        """フォルダ内のファイルを1つ選択するダイアログを開く"""
-        path = filedialog.askopenfilename(
-            title="フォルダ内のファイルを1つ選択",
-            initialdir=self.current_dir,
-            filetypes=[("PDF files", "*.pdf")],
-        )
-        if not path:
-            return
-
-        directory = os.path.dirname(path)
-        filename = os.path.basename(path)
-        try:
-            self.current_dir = directory
-            self.dir_var.set(directory)
-            os.chdir(directory)
-            self.refresh_file_list()
-
-            # select the file in listbox
-            idx = None
-            for i in range(self.file_listbox.size()):
-                if self.file_listbox.get(i) == filename:
-                    idx = i
-                    break
-            if idx is not None:
-                self.file_listbox.selection_clear(0, tk.END)
-                self.file_listbox.selection_set(idx)
-                self.file_listbox.see(idx)
-
-        except Exception as e:
-            messagebox.showerror("エラー", f"ファイル選択に失敗しました:\n{e}")
+    # folder-selection flow removed: app works via drag&drop and file selection only
 
     def _unique_path(self, path):
         """If path exists, append suffix to avoid overwrite."""
