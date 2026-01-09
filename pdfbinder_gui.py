@@ -65,7 +65,11 @@ class PDFManager:
         title_frame.pack_propagate(False)
 
         title_label = tk.Label(
-            title_frame, text="PdfBinder", font=self.title_font, fg="white", bg=self.primary
+            title_frame,
+            text="PdfBinder",
+            font=self.title_font,
+            fg="white",
+            bg=self.primary,
         )
         title_label.pack(expand=True)
 
@@ -102,99 +106,7 @@ class PDFManager:
         )
         extract_btn.pack(side="left", padx=20, pady=10)
 
-        # 操作選択
-        tk.Label(
-            right_frame, text="🔧 操作を選択", font=("Arial", 12, "bold"), bg="#f0f0f0"
-        ).pack(anchor="w", pady=(0, 10))
-
-        # PDF結合セクション
-        merge_frame = tk.LabelFrame(
-            right_frame,
-            text="PDF結合",
-            font=("Arial", 10, "bold"),
-            bg="#f0f0f0",
-            relief="flat",
-            borderwidth=2,
-        )
-        merge_frame.pack(fill="x", pady=(0, 10))
-
-        tk.Label(
-            merge_frame,
-            text="複数のPDFファイルを1つに結合",
-            font=("Arial", 9),
-            bg="#f0f0f0",
-        ).pack(anchor="w", padx=10, pady=5)
-
-        merge_button = tk.Button(
-            merge_frame,
-            text="📄➕ PDF結合を開始",
-            command=self.open_merge_window,
-            bg="#e74c3c",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            relief="flat",
-            pady=8,
-        )
-        merge_button.pack(fill="x", padx=10, pady=(0, 10))
-
-        # ページ抜き取りセクション
-        extract_frame = tk.LabelFrame(
-            right_frame,
-            text="ページ抜き取り",
-            font=("Arial", 10, "bold"),
-            bg="#f0f0f0",
-            relief="flat",
-            borderwidth=2,
-        )
-        extract_frame.pack(fill="x", pady=(0, 10))
-
-        tk.Label(
-            extract_frame,
-            text="PDFから指定ページを抜き取り",
-            font=("Arial", 9),
-            bg="#f0f0f0",
-        ).pack(anchor="w", padx=10, pady=5)
-
-        extract_button = tk.Button(
-            extract_frame,
-            text="📑✂️ ページ抜き取りを開始",
-            command=self.open_extract_window,
-            bg="#9b59b6",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            relief="flat",
-            pady=8,
-        )
-        extract_button.pack(fill="x", padx=10, pady=(0, 10))
-
-        # ヘルプセクション
-        help_frame = tk.LabelFrame(
-            right_frame,
-            text="ヘルプ",
-            font=("Arial", 10, "bold"),
-            bg="#f0f0f0",
-            relief="flat",
-            borderwidth=2,
-        )
-        help_frame.pack(fill="x", pady=(0, 10))
-
-        help_text = tk.Text(
-            help_frame,
-            height=6,
-            wrap="word",
-            font=("Arial", 8),
-            bg="#ecf0f1",
-            relief="flat",
-        )
-        help_text.pack(fill="x", padx=10, pady=5)
-        help_text.insert(
-            "1.0",
-            "📖 使い方:\n\n"
-            "• ファイルをこのウィンドウにドラッグ＆ドロップ、または上の「ファイル追加」から選択してください。\n"
-            "• 追加したPDFは作業ディレクトリにコピーされ、一覧に表示されます。\n\n"
-            "💡 複数ファイル追加: ファイル選択ダイアログで複数選択可能",
-        )
-        help_text.config(state="disabled")
+        # (Simplified main view: no side panels)
 
     def add_files_dialog(self):
         """ファイル選択ダイアログでPDFを追加（複数選択可）"""
