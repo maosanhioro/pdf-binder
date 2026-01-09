@@ -8,10 +8,20 @@ PDFファイルの結合とページ抜き取りを直感的なGUIで操作で�
 # Windows-only: 日本語ロケール（CP932）を優先
 import locale
 import os
+
+# Windows-specific drag & drop (uses ctypes). If not on Windows, D&D is skipped.
 import platform
+import shutil
 import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+
+if platform.system() == "Windows":
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32
+    shell32 = ctypes.windll.shell32
 
 import PyPDF2
 
@@ -84,6 +94,28 @@ class PDFManager:
             padx=20,
         ).pack(side="right")
 
+        tk.Button(
+            dir_frame,
+            text="ファイル追加",
+            command=self.add_files_dialog,
+            bg="#2980b9",
+            fg="white",
+            font=self.default_font,
+            relief="flat",
+            padx=12,
+        ).pack(side="right", padx=(0, 5))
+
+        tk.Button(
+            dir_frame,
+            text="フォルダ内のファイルを1つ選択",
+            command=self.select_file_in_directory,
+            bg="#16a085",
+            fg="white",
+            font=self.default_font,
+            relief="flat",
+            padx=12,
+        ).pack(side="right", padx=(0, 5))
+
         # メインコンテンツエリア
         main_frame = tk.Frame(self.root, bg="#f0f0f0")
         main_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
@@ -116,6 +148,14 @@ class PDFManager:
         )
         self.file_listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.file_listbox.yview)
+
+        # Enable drag & drop on Windows
+        if platform.system() == "Windows":
+            try:
+                self._enable_windows_dnd(self.root)
+            except Exception:
+                # ignore if dnd setup fails
+                pass
 
         # ファイルリスト更新ボタン
         tk.Button(
@@ -236,6 +276,133 @@ class PDFManager:
             self.current_dir = directory
             self.dir_var.set(directory)
             os.chdir(directory)
+            self.refresh_file_list()
+
+    def add_files_dialog(self):
+        """ファイル選択ダイアログでPDFを追加（複数選択可）"""
+        paths = filedialog.askopenfilenames(
+            title="追加するPDFファイルを選択",
+            initialdir=self.current_dir,
+            filetypes=[("PDF files", "*.pdf")],
+        )
+        if not paths:
+            return
+
+        for src in paths:
+            try:
+                basename = os.path.basename(src)
+                dest = os.path.join(self.current_dir, basename)
+                dest = self._unique_path(dest)
+                shutil.copy2(src, dest)
+            except Exception as e:
+                messagebox.showerror("エラー", f"ファイルの追加に失敗しました:\n{e}")
+                return
+
+        self.refresh_file_list()
+
+    def select_file_in_directory(self):
+        """フォルダ内のファイルを1つ選択するダイアログを開く"""
+        path = filedialog.askopenfilename(
+            title="フォルダ内のファイルを1つ選択",
+            initialdir=self.current_dir,
+            filetypes=[("PDF files", "*.pdf")],
+        )
+        if not path:
+            return
+
+        directory = os.path.dirname(path)
+        filename = os.path.basename(path)
+        try:
+            self.current_dir = directory
+            self.dir_var.set(directory)
+            os.chdir(directory)
+            self.refresh_file_list()
+
+            # select the file in listbox
+            idx = None
+            for i in range(self.file_listbox.size()):
+                if self.file_listbox.get(i) == filename:
+                    idx = i
+                    break
+            if idx is not None:
+                self.file_listbox.selection_clear(0, tk.END)
+                self.file_listbox.selection_set(idx)
+                self.file_listbox.see(idx)
+
+        except Exception as e:
+            messagebox.showerror("エラー", f"ファイル選択に失敗しました:\n{e}")
+
+    def _unique_path(self, path):
+        """If path exists, append suffix to avoid overwrite."""
+        base, ext = os.path.splitext(path)
+        counter = 1
+        new_path = path
+        while os.path.exists(new_path):
+            new_path = f"{base}_{counter}{ext}"
+            counter += 1
+        return new_path
+
+    # --- Windows drag & drop implementation ---
+    def _enable_windows_dnd(self, widget):
+        """Enable WM_DROPFILES handling for the given Tk widget (Windows only)."""
+        if platform.system() != "Windows":
+            return
+
+        HWND = widget.winfo_id()
+
+        GWL_WNDPROC = -4
+
+        # Define types
+        WNDPROCTYPE = ctypes.WINFUNCTYPE(
+            ctypes.c_long, ctypes.c_int, ctypes.c_uint, ctypes.c_int, ctypes.c_int
+        )
+
+        # Keep reference to original and new procs
+        try:
+            original_wndproc = user32.GetWindowLongW(HWND, GWL_WNDPROC)
+        except Exception:
+            original_wndproc = user32.GetWindowLongPtrW(HWND, GWL_WNDPROC)
+
+        def py_wndproc(hWnd, msg, wParam, lParam):
+            # WM_DROPFILES = 0x0233
+            if msg == 0x0233:
+                count = shell32.DragQueryFileW(wParam, 0xFFFFFFFF, None, 0)
+                files = []
+                for i in range(count):
+                    buf = ctypes.create_unicode_buffer(260)
+                    shell32.DragQueryFileW(wParam, i, buf, 260)
+                    files.append(buf.value)
+                shell32.DragFinish(wParam)
+                self._on_files_dropped(files)
+                return 0
+            # call original
+            return user32.CallWindowProcW(original_wndproc, hWnd, msg, wParam, lParam)
+
+        # cast and set
+        self._wndproc = WNDPROCTYPE(py_wndproc)
+        try:
+            user32.SetWindowLongW(HWND, GWL_WNDPROC, self._wndproc)
+        except Exception:
+            user32.SetWindowLongPtrW(HWND, GWL_WNDPROC, self._wndproc)
+
+        # enable drag accept
+        shell32.DragAcceptFiles(HWND, True)
+
+    def _on_files_dropped(self, files):
+        """Handle files dropped onto the window: copy PDFs into current_dir and refresh."""
+        added = False
+        for f in files:
+            if f.lower().endswith(".pdf"):
+                try:
+                    dest = os.path.join(self.current_dir, os.path.basename(f))
+                    dest = self._unique_path(dest)
+                    shutil.copy2(f, dest)
+                    added = True
+                except Exception as e:
+                    messagebox.showerror(
+                        "エラー", f"ドラッグ&ドロップでの追加に失敗しました:\n{e}"
+                    )
+        if added:
             self.refresh_file_list()
 
     def refresh_file_list(self):
