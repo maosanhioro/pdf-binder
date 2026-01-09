@@ -58,106 +58,49 @@ class PDFManager:
         self.refresh_file_list()
 
     def create_widgets(self):
-        """ウィジェットを作成"""
-        # メインタイトル
-        title_frame = tk.Frame(self.root, bg=self.primary, height=60)
-        title_frame.pack(fill="x", padx=10, pady=(10, 0))
+        """シンプルなメイン画面: 2つの大きなボタンのみ表示"""
+        # Title bar
+        title_frame = tk.Frame(self.root, bg=self.primary, height=64)
+        title_frame.pack(fill="x")
         title_frame.pack_propagate(False)
 
         title_label = tk.Label(
-            title_frame,
-            text="PdfBinder",
-            font=self.title_font,
-            fg="white",
-            bg=self.primary,
+            title_frame, text="PdfBinder", font=self.title_font, fg="white", bg=self.primary
         )
         title_label.pack(expand=True)
 
-        # Top toolbar: only file-add button (no folder selection)
-        toolbar = tk.Frame(self.root, bg=self.bg_color)
-        toolbar.pack(fill="x", padx=10, pady=10)
+        # Center area with two large buttons
+        center = tk.Frame(self.root, bg=self.bg_color)
+        center.pack(fill="both", expand=True)
 
-        tk.Label(
-            toolbar,
-            text="PdfBinder",
-            font=self.header_font,
-            bg=self.bg_color,
-            fg="#212529",
-        ).pack(side="left")
+        btn_frame = tk.Frame(center, bg=self.bg_color)
+        btn_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        tk.Button(
-            toolbar,
-            text="ファイル追加",
-            command=self.add_files_dialog,
+        merge_btn = tk.Button(
+            btn_frame,
+            text="PDF 結合",
+            command=self.open_merge_window,
             bg=self.primary,
             fg="white",
             font=self.button_font,
+            width=20,
+            height=4,
             relief="flat",
-            padx=12,
-        ).pack(side="right")
-
-        tk.Label(
-            toolbar,
-            text="ファイルをドラッグ＆ドロップするか、上の「ファイル追加」から選択してください。",
-            font=("Segoe UI", 9),
-            bg=self.bg_color,
-            fg="#495057",
-        ).pack(side="right", padx=(0, 10))
-
-        # メインコンテンツエリア
-        main_frame = tk.Frame(self.root, bg="#f0f0f0")
-        main_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
-
-        # 左側：ファイルリスト
-        left_frame = tk.Frame(main_frame, bg=self.bg_color)
-        left_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
-
-        tk.Label(
-            left_frame, text="PDFファイル一覧", font=self.header_font, bg=self.bg_color
-        ).pack(anchor="w", pady=(0, 5))
-
-        # ファイルリストボックス
-        list_frame = tk.Frame(left_frame, bg=self.card_color, bd=0)
-        list_frame.pack(fill="both", expand=True)
-
-        scrollbar = tk.Scrollbar(list_frame)
-        scrollbar.pack(side="right", fill="y")
-
-        self.file_listbox = tk.Listbox(
-            list_frame,
-            selectmode="extended",
-            font=self.default_font,
-            yscrollcommand=scrollbar.set,
-            bg=self.card_color,
-            relief="flat",
-            borderwidth=0,
         )
-        self.file_listbox.pack(side="left", fill="both", expand=True)
-        scrollbar.config(command=self.file_listbox.yview)
+        merge_btn.pack(side="left", padx=20, pady=10)
 
-        # Enable drag & drop on Windows
-        if platform.system() == "Windows":
-            try:
-                self._enable_windows_dnd(self.root)
-            except Exception:
-                # ignore if dnd setup fails
-                pass
-
-        # ファイルリスト更新ボタン
-        tk.Button(
-            left_frame,
-            text="🔄 更新",
-            command=self.refresh_file_list,
-            bg="#27ae60",
+        extract_btn = tk.Button(
+            btn_frame,
+            text="ページ抜き取り",
+            command=self.open_extract_window,
+            bg=self.accent,
             fg="white",
-            font=("Arial", 9),
+            font=self.button_font,
+            width=20,
+            height=4,
             relief="flat",
-            pady=5,
-        ).pack(fill="x", pady=(5, 0))
-
-        # 右側：操作パネル
-        right_frame = tk.Frame(main_frame, bg="#f0f0f0")
-        right_frame.pack(side="right", fill="both", padx=(5, 0))
+        )
+        extract_btn.pack(side="left", padx=20, pady=10)
 
         # 操作選択
         tk.Label(
@@ -367,23 +310,8 @@ class PDFManager:
             self.refresh_file_list()
 
     def refresh_file_list(self):
-        """ファイルリストを更新"""
-        self.file_listbox.delete(0, tk.END)
-
-        try:
-            pdf_files = [
-                f for f in os.listdir(self.current_dir) if f.lower().endswith(".pdf")
-            ]
-            pdf_files.sort()
-
-            for pdf_file in pdf_files:
-                self.file_listbox.insert(tk.END, pdf_file)
-
-            if not pdf_files:
-                self.file_listbox.insert(tk.END, "PDFファイルが見つかりません")
-
-        except Exception as e:
-            messagebox.showerror("エラー", f"ファイルリストの取得に失敗しました:\n{e}")
+        """No-op refresh for simplified UI (kept for compatibility)."""
+        return
 
     def open_merge_window(self):
         """PDF結合ウィンドウを開く"""
