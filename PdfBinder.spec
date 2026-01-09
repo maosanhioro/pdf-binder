@@ -5,7 +5,8 @@ a = Analysis(
     ['pdfbinder_gui.py'],
     pathex=['.'],
     binaries=[],
-    datas=[],
+    # 同梱するドキュメント（配布パッケージで参照できるようにする）
+    datas=[('README.md','.'), ('Windows_Setup_Guide.md','.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
