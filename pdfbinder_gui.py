@@ -292,7 +292,16 @@ class PDFManager:
             try:
                 basename = os.path.basename(src)
                 dest = os.path.join(self.current_dir, basename)
-                dest = self._unique_path(dest)
+                if os.path.exists(dest):
+                    # 確認ダイアログ
+                    do_overwrite = messagebox.askyesno(
+                        "上書き確認",
+                        f"{basename} は既に存在します。上書きしますか？",
+                    )
+                    if not do_overwrite:
+                        # ユーザーが上書きを拒否したらスキップ
+                        continue
+                # コピー（上書き可）。エラー時は例外を投げる
                 shutil.copy2(src, dest)
             except Exception as e:
                 messagebox.showerror("エラー", f"ファイルの追加に失敗しました:\n{e}")
@@ -394,8 +403,15 @@ class PDFManager:
         for f in files:
             if f.lower().endswith(".pdf"):
                 try:
-                    dest = os.path.join(self.current_dir, os.path.basename(f))
-                    dest = self._unique_path(dest)
+                    basename = os.path.basename(f)
+                    dest = os.path.join(self.current_dir, basename)
+                    if os.path.exists(dest):
+                        do_overwrite = messagebox.askyesno(
+                            "上書き確認",
+                            f"{basename} は既に存在します。上書きしますか？",
+                        )
+                        if not do_overwrite:
+                            continue
                     shutil.copy2(f, dest)
                     added = True
                 except Exception as e:
