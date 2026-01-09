@@ -49,3 +49,14 @@ target/
 *.tmp
 *.temp
 ~*
+
+# Virtual env
+.venv/
+
+# PySide6 build artifacts
+build_ps6/
+dist_ps6/
+
+# PyInstaller spec
+PdfBinder.spec
+PdfBinder_PySide6.spec
