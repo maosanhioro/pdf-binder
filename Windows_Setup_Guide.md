@@ -20,15 +20,16 @@ pip install PyPDF2 pyinstaller
 
 ## 3. ソースファイルの準備
 1. `pdfbinder_gui.py` をWindowsのフォルダにコピー
+1. `app.py` をWindowsのフォルダにコピー（PySide6 実装）
 
 ## 4. EXEファイルの作成
 ソースファイルがあるフォルダで以下を実行：
 ```powershell
-# 基本のビルド
-pyinstaller --onefile --windowed --name "PdfBinder" pdfbinder_gui.py
+# 基本のビルド（PySide6 実装）
+pyinstaller --onefile --windowed --name "PdfBinder_PySide6" app.py
 
 # または、より詳細な設定でビルド
-pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath build --specpath . pdfbinder_gui.py
+pyinstaller --onefile --windowed --name "PdfBinder_PySide6" --distpath dist_ps6 --workpath build_ps6 --specpath . app.py
 ```
 
 ## 5. 実行ファイルの確認

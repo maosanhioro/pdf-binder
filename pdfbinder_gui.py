@@ -1,115 +1,235 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-PdfBinder GUI版
-PDFファイルの結合とページ抜き取りを直感的なGUIで操作できます
-"""
+# This file is deprecated. The Tkinter GUI implementation has been
+# replaced by a PySide6-based GUI in `app.py`/`ui_*.py`.
+#
+# To avoid accidental usage, importing this module will raise an error.
+raise RuntimeError("pdfbinder_gui.py (Tkinter) has been removed. Use app.py (PySide6) instead.")
 
-# Windows-only: 日本語ロケール（CP932）を優先
-import locale
-import os
+        # Font preference: Meiryo if available
+        try:
+            available = tkfont.families()
+            base_font = "Meiryo" if "Meiryo" in available else "Segoe UI"
+        except Exception:
+            base_font = "Segoe UI"
 
-# Windows-specific drag & drop (uses ctypes). If not on Windows, D&D is skipped.
-import platform
-import shutil
-import sys
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+        self.default_font = (base_font, 11)
+        self.title_font = (base_font, 18, "bold")
+        self.header_font = (base_font, 14, "bold")
+        self.button_font = (base_font, 11, "bold")
 
-if platform.system() == "Windows":
-    import ctypes
-    from ctypes import wintypes
-
-    user32 = ctypes.windll.user32
-    shell32 = ctypes.windll.shell32
-
-import PyPDF2
-
-try:
-    locale.setlocale(locale.LC_ALL, "Japanese_Japan.932")
-except:
-    pass
-
-
-class PDFManager:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("PdfBinder")
-        self.root.geometry("800x600")
-        self.root.configure(bg="#f0f0f0")
-
-        # Modernized font and color scheme
-        self.default_font = ("Segoe UI", 10)
-        self.title_font = ("Segoe UI", 18, "bold")
-        self.header_font = ("Segoe UI", 12, "bold")
-        self.button_font = ("Segoe UI", 10, "bold")
-
-        # Color palette
-        self.bg_color = "#f8f9fa"
-        self.card_color = "#ffffff"
-        self.primary = "#0d6efd"
+        # Colors (Calm / Windows-light inspired)
+        self.bg_color = "#F4F6F8"
+        self.card_color = "#FFFFFF"
+        self.border_color = "#E2E6EA"
+        self.primary = "#2B7CD3"
         self.accent = "#198754"
-        self.danger = "#dc3545"
 
-        # 現在のディレクトリ
-        self.current_dir = os.getcwd()
+        # state: use executable/script directory
+        if getattr(sys, "frozen", False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.current_dir = base_dir
+        self.selected_files = []  # absolute paths (order source)
+        self.password_var = tk.StringVar()
+        self.page_var = tk.StringVar()
 
-        self.create_widgets()
-        self.refresh_file_list()
-
-    def create_widgets(self):
-        """シンプルなメイン画面: 2つの大きなボタンのみ表示"""
-        # Title bar
-        title_frame = tk.Frame(self.root, bg=self.primary, height=64)
-        title_frame.pack(fill="x")
-        title_frame.pack_propagate(False)
-
-        title_label = tk.Label(
-            title_frame,
-            text="PdfBinder",
-            font=self.title_font,
-            fg="white",
-            bg=self.primary,
+        # Header
+        header = tk.Frame(self.root, bg=self.bg_color)
+        header.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 6))
+        header.grid_columnconfigure(0, weight=1)
+        tk.Label(header, text="PdfBinder", font=self.title_font, bg=self.bg_color).pack(
+            side="left"
         )
-        title_label.pack(expand=True)
+        tk.Label(
+            header,
+            text="シンプルに結合/抽出",
+            font=(self.default_font[0], 12),
+            bg=self.bg_color,
+            fg="#6B7280",
+        ).pack(side="right")
 
-        # Center area with two large buttons
-        center = tk.Frame(self.root, bg=self.bg_color)
-        center.pack(fill="both", expand=True)
+        # Main two-column layout
+        main = tk.Frame(self.root, bg=self.bg_color)
+        main.grid(row=1, column=0, sticky="nsew", padx=16, pady=8)
+        self.root.grid_rowconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+        main.grid_columnconfigure(0, weight=1)
+        main.grid_columnconfigure(1, weight=1)
 
-        btn_frame = tk.Frame(center, bg=self.bg_color)
-        btn_frame.place(relx=0.5, rely=0.5, anchor="center")
-
-        merge_btn = tk.Button(
-            btn_frame,
-            text="PDF 結合",
-            command=self.open_merge_window,
+        # Left panel: file input
+        left = tk.Frame(main, bg=self.bg_color)
+        left.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
+        tk.Label(left, text="ファイル", font=self.header_font, bg=self.bg_color).pack(
+            anchor="w"
+        )
+        btn_row = tk.Frame(left, bg=self.bg_color)
+        btn_row.pack(anchor="w", pady=(6, 2))
+        tk.Button(
+            btn_row,
+            text="PDFを追加",
+            command=self.add_files_dialog,
             bg=self.primary,
             fg="white",
             font=self.button_font,
-            width=20,
-            height=4,
             relief="flat",
-        )
-        merge_btn.pack(side="left", padx=20, pady=10)
+        ).pack(side="left")
+        tk.Label(
+            left,
+            text="順番はドラッグで入れ替え",
+            font=(self.default_font[0], 9),
+            fg="#6B7280",
+            bg=self.bg_color,
+        ).pack(anchor="w", pady=(6, 0))
 
-        extract_btn = tk.Button(
-            btn_frame,
-            text="ページ抜き取り",
-            command=self.open_extract_window,
+        list_frame = tk.Frame(left, bg=self.bg_color)
+        list_frame.pack(fill="both", expand=True, pady=8)
+        self.file_listbox = tk.Listbox(
+            list_frame, height=12, font=self.default_font, selectmode=tk.EXTENDED
+        )
+        self.file_listbox.pack(side="left", fill="both", expand=True)
+        scrollbar = tk.Scrollbar(list_frame, command=self.file_listbox.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.file_listbox.config(yscrollcommand=scrollbar.set)
+
+        # move buttons row
+        move_panel = tk.Frame(left, bg=self.bg_color)
+        move_panel.pack(anchor="e", pady=(6, 0))
+        tk.Button(
+            move_panel,
+            text="上へ",
+            command=self.move_up,
+            font=(self.default_font[0], 10),
+        ).grid(row=0, column=0, padx=4)
+        tk.Button(
+            move_panel,
+            text="下へ",
+            command=self.move_down,
+            font=(self.default_font[0], 10),
+        ).grid(row=0, column=1, padx=4)
+        tk.Button(
+            move_panel,
+            text="削除",
+            command=self.remove_selected,
+            font=(self.default_font[0], 10),
+        ).grid(row=0, column=2, padx=4)
+
+        # enable drag reorder on listbox
+        self.file_listbox.bind("<Button-1>", self._on_list_press)
+        self.file_listbox.bind("<B1-Motion>", self._on_list_drag)
+        self.file_listbox.bind("<ButtonRelease-1>", self._on_list_release)
+
+        # Right panel: operations
+        right = tk.Frame(main, bg=self.bg_color)
+        right.grid(row=0, column=1, sticky="nsew")
+        tk.Label(right, text="操作", font=self.header_font, bg=self.bg_color).pack(
+            anchor="w"
+        )
+
+        # mode toggle
+        mode_row = tk.Frame(right, bg=self.bg_color)
+        mode_row.pack(anchor="w", pady=(6, 8))
+        self.mode_var = tk.StringVar(value="merge")
+        tk.Radiobutton(
+            mode_row,
+            text="結合",
+            value="merge",
+            variable=self.mode_var,
+            command=self.render_mode,
+            bg=self.bg_color,
+        ).pack(side="left", padx=(0, 8))
+        tk.Radiobutton(
+            mode_row,
+            text="抜粋",
+            value="extract",
+            variable=self.mode_var,
+            command=self.render_mode,
+            bg=self.bg_color,
+        ).pack(side="left")
+
+        # mode container card
+        self.mode_container = tk.Frame(right, bg=self.card_color, bd=1, relief="flat")
+        self.mode_container.pack(fill="both", expand=True, pady=(0, 8))
+
+        # merge view
+        self.merge_view = tk.Frame(self.mode_container, bg=self.card_color)
+        tk.Label(self.merge_view, text="出力先", bg=self.card_color).grid(
+            row=0, column=0, sticky="w", padx=12, pady=(12, 4)
+        )
+        self.output_dir = tk.StringVar(value=self.current_dir)
+        tk.Entry(self.merge_view, textvariable=self.output_dir, width=36).grid(
+            row=0, column=1, padx=6, pady=(12, 4)
+        )
+        tk.Button(self.merge_view, text="参照", command=self.choose_dir).grid(
+            row=0, column=2, padx=6, pady=(12, 4)
+        )
+        tk.Label(self.merge_view, text="出力名", bg=self.card_color).grid(
+            row=1, column=0, sticky="w", padx=12, pady=(4, 8)
+        )
+        self.output_name = tk.StringVar(value="merged.pdf")
+        tk.Entry(self.merge_view, textvariable=self.output_name, width=36).grid(
+            row=1, column=1, padx=6, pady=(4, 8)
+        )
+        tk.Button(
+            self.merge_view,
+            text="結合を実行",
+            command=self.merge_pdfs,
+            bg=self.primary,
+            fg="white",
+        ).grid(row=2, column=0, columnspan=3, pady=(8, 12))
+
+        # extract view
+        self.extract_view = tk.Frame(self.mode_container, bg=self.card_color)
+        tk.Label(
+            self.extract_view, text="ページ指定 (例: 1,3-5)", bg=self.card_color
+        ).grid(row=0, column=0, sticky="w", padx=12, pady=(12, 4))
+        tk.Entry(self.extract_view, textvariable=self.page_var, width=36).grid(
+            row=0, column=1, padx=6, pady=(12, 4)
+        )
+        tk.Label(
+            self.extract_view, text="パスワード (必要時)", bg=self.card_color
+        ).grid(row=1, column=0, sticky="w", padx=12, pady=(4, 4))
+        tk.Entry(
+            self.extract_view, textvariable=self.password_var, show="*", width=36
+        ).grid(row=1, column=1, padx=6, pady=(4, 4))
+        tk.Label(self.extract_view, text="出力先", bg=self.card_color).grid(
+            row=2, column=0, sticky="w", padx=12, pady=(4, 4)
+        )
+        tk.Entry(self.extract_view, textvariable=self.output_dir, width=36).grid(
+            row=2, column=1, padx=6, pady=(4, 4)
+        )
+        tk.Button(self.extract_view, text="参照", command=self.choose_dir).grid(
+            row=2, column=2, padx=6, pady=(4, 4)
+        )
+        tk.Label(self.extract_view, text="出力名", bg=self.card_color).grid(
+            row=3, column=0, sticky="w", padx=12, pady=(4, 8)
+        )
+        self.extract_name = tk.StringVar(value="extracted.pdf")
+        tk.Entry(self.extract_view, textvariable=self.extract_name, width=36).grid(
+            row=3, column=1, padx=6, pady=(4, 8)
+        )
+        tk.Button(
+            self.extract_view,
+            text="抜粋を実行",
+            command=self.extract_pages,
             bg=self.accent,
             fg="white",
-            font=self.button_font,
-            width=20,
-            height=4,
-            relief="flat",
-        )
-        extract_btn.pack(side="left", padx=20, pady=10)
+        ).grid(row=4, column=0, columnspan=3, pady=(8, 12))
 
-        # (Simplified main view: no side panels)
+        # initially render merge view
+        self.render_mode()
+
+        # Footer: progress + status
+        footer = tk.Frame(self.root, bg=self.bg_color)
+        footer.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
+        self.progress = ttk.Progressbar(footer, mode="indeterminate")
+        self.progress.pack(side="left", fill="x", expand=True, padx=(0, 12))
+        self.status_var = tk.StringVar(value="準備完了")
+        tk.Label(
+            footer, textvariable=self.status_var, bg=self.bg_color, fg="#6B7280"
+        ).pack(side="right")
 
     def add_files_dialog(self):
-        """ファイル選択ダイアログでPDFを追加（複数選択可）"""
         paths = filedialog.askopenfilenames(
             title="追加するPDFファイルを選択",
             initialdir=self.current_dir,
@@ -118,531 +238,288 @@ class PDFManager:
         if not paths:
             return
 
+        added = False
         for src in paths:
-            try:
-                basename = os.path.basename(src)
-                dest = os.path.join(self.current_dir, basename)
-                if os.path.exists(dest):
-                    # 確認ダイアログ
-                    do_overwrite = messagebox.askyesno(
-                        "上書き確認",
-                        f"{basename} は既に存在します。上書きしますか？",
-                    )
-                    if not do_overwrite:
-                        # ユーザーが上書きを拒否したらスキップ
-                        continue
-                # コピー（上書き可）。エラー時は例外を投げる
-                shutil.copy2(src, dest)
-            except Exception as e:
-                messagebox.showerror("エラー", f"ファイルの追加に失敗しました:\n{e}")
-                return
+            if not src.lower().endswith(".pdf"):
+                continue
+            if src in self.selected_files:
+                continue
+            self.selected_files.append(src)
+            added = True
 
-        self.refresh_file_list()
+        if added:
+            self.update_files_display()
 
-    # folder-selection flow removed: app works via drag&drop and file selection only
-
-    def _unique_path(self, path):
-        """If path exists, append suffix to avoid overwrite."""
-        base, ext = os.path.splitext(path)
-        counter = 1
-        new_path = path
-        while os.path.exists(new_path):
-            new_path = f"{base}_{counter}{ext}"
-            counter += 1
-        return new_path
-
-    # --- Windows drag & drop implementation ---
-    def _enable_windows_dnd(self, widget):
-        """Enable WM_DROPFILES handling for the given Tk widget (Windows only)."""
-        if platform.system() != "Windows":
+    def remove_selected(self):
+        sel = list(self.file_listbox.curselection())
+        if not sel:
             return
+        # remove from selected_files in reverse order
+        for i in sorted(sel, reverse=True):
+            try:
+                del self.selected_files[i]
+            except Exception:
+                pass
+        self.update_files_display()
 
-        HWND = widget.winfo_id()
+    def choose_dir(self):
+        d = filedialog.askdirectory(initialdir=self.current_dir, title="出力先を選択")
+        if d:
+            self.output_dir.set(d)
 
-        GWL_WNDPROC = -4
+    def render_mode(self):
+        # clear container
+        for w in self.mode_container.winfo_children():
+            w.pack_forget() if hasattr(w, "pack_info") else None
+            try:
+                w.grid_forget()
+            except Exception:
+                pass
+        mode = self.mode_var.get()
+        if mode == "merge":
+            self.merge_view.pack(fill="both", expand=True)
+        else:
+            self.extract_view.pack(fill="both", expand=True)
 
-        # Define types
-        WNDPROCTYPE = ctypes.WINFUNCTYPE(
-            ctypes.c_long, ctypes.c_int, ctypes.c_uint, ctypes.c_int, ctypes.c_int
-        )
-
-        # Keep reference to original and new procs
+    # Drag & drop reordering for Listbox (reorders selected_files)
+    def _on_list_press(self, event):
         try:
-            original_wndproc = user32.GetWindowLongW(HWND, GWL_WNDPROC)
+            idx = self.file_listbox.nearest(event.y)
+            self._drag_index = idx
+            self._drag_active = True
         except Exception:
-            original_wndproc = user32.GetWindowLongPtrW(HWND, GWL_WNDPROC)
+            self._drag_index = None
+            self._drag_active = False
 
-        def py_wndproc(hWnd, msg, wParam, lParam):
-            # WM_DROPFILES = 0x0233
-            if msg == 0x0233:
-                count = shell32.DragQueryFileW(wParam, 0xFFFFFFFF, None, 0)
-                files = []
-                for i in range(count):
-                    buf = ctypes.create_unicode_buffer(260)
-                    shell32.DragQueryFileW(wParam, i, buf, 260)
-                    files.append(buf.value)
-                shell32.DragFinish(wParam)
-                self._on_files_dropped(files)
-                return 0
-            # call original
-            return user32.CallWindowProcW(original_wndproc, hWnd, msg, wParam, lParam)
-
-        # cast and set
-        self._wndproc = WNDPROCTYPE(py_wndproc)
+    def _on_list_drag(self, event):
+        if not getattr(self, "_drag_active", False):
+            return
         try:
-            user32.SetWindowLongW(HWND, GWL_WNDPROC, self._wndproc)
+            target = self.file_listbox.nearest(event.y)
+            if target != self._drag_index and 0 <= target < len(self.selected_files):
+                # move element
+                item = self.selected_files.pop(self._drag_index)
+                self.selected_files.insert(target, item)
+                self._drag_index = target
+                self.update_files_display()
+                # restore selection to moved item
+                self.file_listbox.selection_clear(0, tk.END)
+                self.file_listbox.selection_set(target)
         except Exception:
-            user32.SetWindowLongPtrW(HWND, GWL_WNDPROC, self._wndproc)
+            pass
 
-        # enable drag accept
-        shell32.DragAcceptFiles(HWND, True)
+    def _on_list_release(self, event):
+        self._drag_active = False
+        self._drag_index = None
+
+    # D&D support removed for compatibility across environments
+
+    # Note: file-adding is done via `ファイルを選択` ボタン
 
     def _on_files_dropped(self, files):
-        """Handle files dropped onto the window: copy PDFs into current_dir and refresh."""
-        added = False
-        for f in files:
-            if f.lower().endswith(".pdf"):
-                try:
-                    basename = os.path.basename(f)
-                    dest = os.path.join(self.current_dir, basename)
-                    if os.path.exists(dest):
-                        do_overwrite = messagebox.askyesno(
-                            "上書き確認",
-                            f"{basename} は既に存在します。上書きしますか？",
-                        )
-                        if not do_overwrite:
-                            continue
-                    shutil.copy2(f, dest)
-                    added = True
-                except Exception as e:
-                    messagebox.showerror(
-                        "エラー", f"ドラッグ&ドロップでの追加に失敗しました:\n{e}"
-                    )
-        if added:
-            self.refresh_file_list()
-
-    def refresh_file_list(self):
-        """No-op refresh for simplified UI (kept for compatibility)."""
+        # removed
         return
 
-    def open_merge_window(self):
-        """PDF結合ウィンドウを開く"""
-        MergeWindow(self.root, self.current_dir, self.refresh_file_list)
+    def update_files_display(self):
+        self.file_listbox.delete(0, tk.END)
+        for p in self.selected_files:
+            self.file_listbox.insert(tk.END, os.path.basename(p))
+        self.status_var.set(f"ファイル数: {len(self.selected_files)}")
 
-    def open_extract_window(self):
-        """ページ抜き取りウィンドウを開く"""
-        ExtractWindow(self.root, self.current_dir, self.refresh_file_list)
+    def move_up(self):
+        sel = list(self.file_listbox.curselection())
+        if not sel:
+            return
+        if min(sel) == 0:
+            return
+        # move selected items up preserving relative order
+        for idx in sorted(sel):
+            if idx - 1 in sel:
+                continue
+            self.selected_files[idx - 1], self.selected_files[idx] = (
+                self.selected_files[idx],
+                self.selected_files[idx - 1],
+            )
 
+        self.update_files_display()
+        # restore selection
+        new_sel = [i - 1 for i in sel]
+        for i in new_sel:
+            self.file_listbox.selection_set(i)
 
-class MergeWindow:
-    def __init__(self, parent, current_dir, refresh_callback):
-        self.current_dir = current_dir
-        self.refresh_callback = refresh_callback
+    def move_down(self):
+        sel = list(self.file_listbox.curselection())
+        if not sel:
+            return
+        if max(sel) >= len(self.selected_files) - 1:
+            return
+        # move selected items down preserving relative order
+        for idx in sorted(sel, reverse=True):
+            if idx + 1 in sel:
+                continue
+            self.selected_files[idx + 1], self.selected_files[idx] = (
+                self.selected_files[idx],
+                self.selected_files[idx + 1],
+            )
 
-        self.window = tk.Toplevel(parent)
-        self.window.title("PdfBinder - PDF結合")
-        self.window.geometry("600x500")
-        self.window.configure(bg="#f0f0f0")
-        self.window.grab_set()  # モーダルウィンドウ
+        self.update_files_display()
+        # restore selection
+        new_sel = [i + 1 for i in sel]
+        for i in new_sel:
+            self.file_listbox.selection_set(i)
 
-        self.create_widgets()
-        self.load_pdf_files()
+    def _start_progress(self, maximum=None):
+        if maximum:
+            self.progress.config(mode="determinate", maximum=maximum, value=0)
+        else:
+            self.progress.config(mode="indeterminate")
+            self.progress.start(10)
 
-    def create_widgets(self):
-        """ウィジェットを作成"""
-        # タイトル
-        title_label = tk.Label(
-            self.window,
-            text="📄➕ PDF結合",
-            font=("Arial", 16, "bold"),
-            bg="#f0f0f0",
-            fg="#2c3e50",
-        )
-        title_label.pack(pady=10)
-
-        # ファイル選択エリア
-        file_frame = tk.LabelFrame(
-            self.window,
-            text="結合するファイルを選択",
-            font=("Arial", 10, "bold"),
-            bg="#f0f0f0",
-        )
-        file_frame.pack(fill="both", expand=True, padx=20, pady=10)
-
-        # ファイルリスト
-        list_frame = tk.Frame(file_frame)
-        list_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-        scrollbar = tk.Scrollbar(list_frame)
-        scrollbar.pack(side="right", fill="y")
-
-        self.file_listbox = tk.Listbox(
-            list_frame,
-            selectmode="extended",
-            font=("Arial", 9),
-            yscrollcommand=scrollbar.set,
-        )
-        self.file_listbox.pack(side="left", fill="both", expand=True)
-        scrollbar.config(command=self.file_listbox.yview)
-
-        # 出力ファイル名
-        output_frame = tk.Frame(self.window, bg="#f0f0f0")
-        output_frame.pack(fill="x", padx=20, pady=10)
-
-        tk.Label(
-            output_frame, text="出力ファイル名:", font=("Arial", 10), bg="#f0f0f0"
-        ).pack(side="left")
-        self.output_var = tk.StringVar(value="結合されたPDF")
-        tk.Entry(output_frame, textvariable=self.output_var, font=("Arial", 10)).pack(
-            side="left", fill="x", expand=True, padx=(10, 5)
-        )
-        tk.Label(output_frame, text=".pdf", font=("Arial", 10), bg="#f0f0f0").pack(
-            side="right"
-        )
-
-        # ボタン
-        button_frame = tk.Frame(self.window, bg="#f0f0f0")
-        button_frame.pack(fill="x", padx=20, pady=20)
-
-        tk.Button(
-            button_frame,
-            text="キャンセル",
-            command=self.window.destroy,
-            bg="#95a5a6",
-            fg="white",
-            font=("Arial", 10),
-            relief="flat",
-            padx=20,
-        ).pack(side="right", padx=(10, 0))
-
-        tk.Button(
-            button_frame,
-            text="結合実行",
-            command=self.merge_pdfs,
-            bg="#e74c3c",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            relief="flat",
-            padx=20,
-        ).pack(side="right")
-
-    def load_pdf_files(self):
-        """PDFファイルをロード"""
+    def _stop_progress(self):
         try:
-            pdf_files = [
-                f for f in os.listdir(self.current_dir) if f.lower().endswith(".pdf")
-            ]
-            pdf_files.sort()
-
-            for pdf_file in pdf_files:
-                self.file_listbox.insert(tk.END, pdf_file)
-
-        except Exception as e:
-            messagebox.showerror("エラー", f"ファイルの読み込みに失敗しました:\n{e}")
+            if self.progress["mode"] == "indeterminate":
+                self.progress.stop()
+        except Exception:
+            pass
+        try:
+            self.progress.config(value=0)
+        except Exception:
+            pass
 
     def merge_pdfs(self):
-        """PDFを結合"""
-        selected_indices = self.file_listbox.curselection()
-        if not selected_indices:
-            messagebox.showwarning("警告", "結合するファイルを選択してください。")
+        if len(self.selected_files) < 2:
+            messagebox.showerror(
+                "エラー", "結合するPDFファイルを2件以上追加してください。"
+            )
             return
 
-        output_name = self.output_var.get().strip()
-        if not output_name:
-            messagebox.showwarning("警告", "出力ファイル名を入力してください。")
-            return
-
-        if not output_name.endswith(".pdf"):
-            output_name += ".pdf"
-
-        selected_files = [self.file_listbox.get(i) for i in selected_indices]
+        out_dir = self.output_dir.get() or self.current_dir
+        out_name = self.output_name.get() or "merged.pdf"
+        out_path = os.path.join(out_dir, out_name)
 
         try:
-            pdf_merger = PyPDF2.PdfMerger()
+            self.status_var.set("結合中...")
+            self._start_progress()
 
-            for pdf_file in selected_files:
-                file_path = os.path.join(self.current_dir, pdf_file)
-                with open(file_path, "rb") as file:
-                    pdf_merger.append(file)
+            merger = PyPDF2.PdfMerger()
+            for p in self.selected_files:
+                with open(p, "rb") as fh:
+                    reader = PyPDF2.PdfReader(fh)
+                    if getattr(reader, "is_encrypted", False):
+                        raise RuntimeError(
+                            f"{os.path.basename(p)} は暗号化されています。結合はサポートされていません。"
+                        )
+                    merger.append(reader)
 
-            output_path = os.path.join(self.current_dir, output_name)
-            with open(output_path, "wb") as output_file:
-                pdf_merger.write(output_file)
+            out_path = unique_path(out_path)
+            with open(out_path, "wb") as out_f:
+                merger.write(out_f)
+            merger.close()
 
-            pdf_merger.close()
-
-            messagebox.showinfo("完了", f"PDFの結合が完了しました:\n{output_name}")
-            self.refresh_callback()
-            self.window.destroy()
-
+            self.status_var.set(f"結合完了: {os.path.basename(out_path)}")
+            self._stop_progress()
         except Exception as e:
+            self._stop_progress()
+            self.status_var.set("エラー")
             messagebox.showerror("エラー", f"PDFの結合に失敗しました:\n{e}")
 
-
-class ExtractWindow:
-    def __init__(self, parent, current_dir, refresh_callback):
-        self.current_dir = current_dir
-        self.refresh_callback = refresh_callback
-
-        self.window = tk.Toplevel(parent)
-        self.window.title("PdfBinder - ページ抜き取り")
-        self.window.geometry("700x600")
-        self.window.configure(bg="#f0f0f0")
-        self.window.grab_set()  # モーダルウィンドウ
-
-        self.create_widgets()
-        self.load_pdf_files()
-
-    def create_widgets(self):
-        """ウィジェットを作成"""
-        # タイトル
-        title_label = tk.Label(
-            self.window,
-            text="📑✂️ ページ抜き取り",
-            font=("Arial", 16, "bold"),
-            bg="#f0f0f0",
-            fg="#2c3e50",
-        )
-        title_label.pack(pady=10)
-
-        # ファイル選択
-        file_frame = tk.Frame(self.window, bg="#f0f0f0")
-        file_frame.pack(fill="x", padx=20, pady=10)
-
-        tk.Label(
-            file_frame, text="PDFファイルを選択:", font=("Arial", 10), bg="#f0f0f0"
-        ).pack(side="left")
-        self.file_var = tk.StringVar()
-        file_combo = ttk.Combobox(
-            file_frame, textvariable=self.file_var, state="readonly", font=("Arial", 9)
-        )
-        file_combo.pack(side="left", fill="x", expand=True, padx=(10, 0))
-        file_combo.bind("<<ComboboxSelected>>", self.on_file_selected)
-        self.file_combo = file_combo
-
-        # PDF情報表示
-        info_frame = tk.LabelFrame(
-            self.window,
-            text="PDFファイル情報",
-            font=("Arial", 10, "bold"),
-            bg="#f0f0f0",
-        )
-        info_frame.pack(fill="x", padx=20, pady=10)
-
-        self.info_text = tk.Text(
-            info_frame,
-            height=3,
-            wrap="word",
-            font=("Arial", 9),
-            bg="#ecf0f1",
-            relief="flat",
-        )
-        self.info_text.pack(fill="x", padx=10, pady=5)
-
-        # ページ指定
-        page_frame = tk.LabelFrame(
-            self.window,
-            text="抜き取るページを指定",
-            font=("Arial", 10, "bold"),
-            bg="#f0f0f0",
-        )
-        page_frame.pack(fill="both", expand=True, padx=20, pady=10)
-
-        # 指定方法の説明
-        help_text = tk.Text(
-            page_frame,
-            height=4,
-            wrap="word",
-            font=("Arial", 8),
-            bg="#fff3cd",
-            relief="flat",
-        )
-        help_text.pack(fill="x", padx=10, pady=5)
-        help_text.insert(
-            "1.0",
-            "📖 ページ指定方法:\n"
-            "• 単一ページ: 1,3,5\n"
-            "• 範囲指定: 1-5,8,10-12\n"
-            "• 混合: 1,3-5,7,9-10",
-        )
-        help_text.config(state="disabled")
-
-        tk.Label(page_frame, text="ページ番号:", font=("Arial", 10), bg="#f0f0f0").pack(
-            anchor="w", padx=10, pady=(10, 5)
-        )
-        self.page_var = tk.StringVar()
-        tk.Entry(page_frame, textvariable=self.page_var, font=("Arial", 10)).pack(
-            fill="x", padx=10, pady=(0, 10)
-        )
-
-        # 出力ファイル名
-        output_frame = tk.Frame(self.window, bg="#f0f0f0")
-        output_frame.pack(fill="x", padx=20, pady=10)
-
-        tk.Label(
-            output_frame, text="出力ファイル名:", font=("Arial", 10), bg="#f0f0f0"
-        ).pack(side="left")
-        self.output_var = tk.StringVar(value="抜き取ったページ")
-        tk.Entry(output_frame, textvariable=self.output_var, font=("Arial", 10)).pack(
-            side="left", fill="x", expand=True, padx=(10, 5)
-        )
-        tk.Label(output_frame, text=".pdf", font=("Arial", 10), bg="#f0f0f0").pack(
-            side="right"
-        )
-
-        # ボタン
-        button_frame = tk.Frame(self.window, bg="#f0f0f0")
-        button_frame.pack(fill="x", padx=20, pady=20)
-
-        tk.Button(
-            button_frame,
-            text="キャンセル",
-            command=self.window.destroy,
-            bg="#95a5a6",
-            fg="white",
-            font=("Arial", 10),
-            relief="flat",
-            padx=20,
-        ).pack(side="right", padx=(10, 0))
-
-        tk.Button(
-            button_frame,
-            text="抜き取り実行",
-            command=self.extract_pages,
-            bg="#9b59b6",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            relief="flat",
-            padx=20,
-        ).pack(side="right")
-
-    def load_pdf_files(self):
-        """PDFファイルをロード"""
-        try:
-            pdf_files = [
-                f for f in os.listdir(self.current_dir) if f.lower().endswith(".pdf")
-            ]
-            pdf_files.sort()
-
-            self.file_combo["values"] = pdf_files
-            if pdf_files:
-                self.file_combo.current(0)
-                self.on_file_selected(None)
-
-        except Exception as e:
-            messagebox.showerror("エラー", f"ファイルの読み込みに失敗しました:\n{e}")
-
-    def on_file_selected(self, event):
-        """ファイルが選択されたときの処理"""
-        selected_file = self.file_var.get()
-        if not selected_file:
-            return
-
-        try:
-            file_path = os.path.join(self.current_dir, selected_file)
-            with open(file_path, "rb") as file:
-                pdf_reader = PyPDF2.PdfReader(file)
-                total_pages = len(pdf_reader.pages)
-
-                info_text = f"ファイル名: {selected_file}\n"
-                info_text += f"総ページ数: {total_pages}\n"
-                info_text += f"サイズ: {os.path.getsize(file_path) / 1024:.1f} KB"
-
-                self.info_text.config(state="normal")
-                self.info_text.delete("1.0", tk.END)
-                self.info_text.insert("1.0", info_text)
-                self.info_text.config(state="disabled")
-
-        except Exception as e:
-            self.info_text.config(state="normal")
-            self.info_text.delete("1.0", tk.END)
-            self.info_text.insert("1.0", f"エラー: {e}")
-            self.info_text.config(state="disabled")
-
-    def parse_page_range(self, page_input, total_pages):
-        """ページ範囲を解析"""
-        pages = []
-
-        try:
-            for part in page_input.split(","):
-                part = part.strip()
-
-                if "-" in part:
-                    start, end = map(int, part.split("-"))
-                    if start <= end:
-                        pages.extend(range(start, end + 1))
-                else:
-                    pages.append(int(part))
-
-            pages = sorted(list(set(pages)))
-            valid_pages = [p for p in pages if 1 <= p <= total_pages]
-
-            return valid_pages
-
-        except ValueError:
-            return []
-
     def extract_pages(self):
-        """ページを抜き取り"""
-        selected_file = self.file_var.get()
-        if not selected_file:
-            messagebox.showwarning("警告", "PDFファイルを選択してください。")
+        if not self.selected_files:
+            messagebox.showerror("エラー", "抽出対象のPDFファイルを追加してください。")
             return
+
+        sel = self.file_listbox.curselection()
+        if not sel:
+            messagebox.showerror(
+                "エラー", "抽出したいファイルをリストから選択してください。"
+            )
+            return
+        if len(sel) > 1:
+            messagebox.showerror(
+                "エラー", "抜き取りは1つのファイルのみ選択してください。"
+            )
+            return
+        selected_path = self.selected_files[sel[0]]
 
         page_input = self.page_var.get().strip()
         if not page_input:
-            messagebox.showwarning("警告", "ページ番号を入力してください。")
+            messagebox.showerror(
+                "エラー", "抜き取りたいページをページ指定欄に入力してください。"
+            )
             return
 
-        output_name = self.output_var.get().strip()
-        if not output_name:
-            messagebox.showwarning("警告", "出力ファイル名を入力してください。")
-            return
+        out_dir = self.output_dir.get() or self.current_dir
+        out_name = self.extract_name.get() or "extracted.pdf"
+        out_path = os.path.join(out_dir, out_name)
 
-        if not output_name.endswith(".pdf"):
-            output_name += ".pdf"
+        pw = self.password_var.get().strip() if self.password_var.get() else None
 
         try:
-            file_path = os.path.join(self.current_dir, selected_file)
+            self.status_var.set("抜き取り中...")
+            self._start_progress()
 
-            with open(file_path, "rb") as input_file:
-                pdf_reader = PyPDF2.PdfReader(input_file)
-                total_pages = len(pdf_reader.pages)
+            with open(selected_path, "rb") as fh:
+                reader = PyPDF2.PdfReader(fh)
+                if getattr(reader, "is_encrypted", False):
+                    if not pw:
+                        raise RuntimeError(
+                            "このPDFはパスワードで保護されています。パスワードを入力してください。"
+                        )
+                    ok = reader.decrypt(pw)
+                    if not ok:
+                        raise RuntimeError("パスワードが不正です。")
 
-                page_numbers = self.parse_page_range(page_input, total_pages)
+                total_pages = len(reader.pages)
+                pages = []
+                for part in page_input.split(","):
+                    part = part.strip()
+                    if "-" in part:
+                        vals = part.split("-", 1)
+                        try:
+                            start = int(vals[0])
+                            end = int(vals[1])
+                        except Exception:
+                            raise RuntimeError("無効なページ指定です。")
+                        if start > end:
+                            raise RuntimeError("無効なページ範囲です。")
+                        for pn in range(start, end + 1):
+                            if pn < 1 or pn > total_pages:
+                                raise RuntimeError(f"ページ番号 {pn} が範囲外です。")
+                            pages.append(pn)
+                    else:
+                        try:
+                            pn = int(part)
+                        except Exception:
+                            raise RuntimeError("無効なページ指定です。")
+                        if pn < 1 or pn > total_pages:
+                            raise RuntimeError(f"ページ番号 {pn} が範囲外です。")
+                        pages.append(pn)
 
-                if not page_numbers:
-                    messagebox.showerror(
-                        "エラー", "有効なページ番号を入力してください。"
-                    )
-                    return
+                if not pages:
+                    raise RuntimeError("有効なページ指定がありません。")
 
-                pdf_writer = PyPDF2.PdfWriter()
+                writer = PyPDF2.PdfWriter()
+                for p in pages:
+                    writer.add_page(reader.pages[p - 1])
 
-                for page_num in page_numbers:
-                    pdf_writer.add_page(pdf_reader.pages[page_num - 1])
+                out_path = unique_path(out_path)
+                with open(out_path, "wb") as out_f:
+                    writer.write(out_f)
 
-                output_path = os.path.join(self.current_dir, output_name)
-                with open(output_path, "wb") as output_file:
-                    pdf_writer.write(output_file)
-
-                messagebox.showinfo(
-                    "完了",
-                    f"ページの抜き取りが完了しました:\n{output_name}\n抜き取ったページ: {page_numbers}",
-                )
-                self.refresh_callback()
-                self.window.destroy()
+            self.status_var.set(f"抜き取り完了: {os.path.basename(out_path)}")
+            self._stop_progress()
 
         except Exception as e:
+            self._stop_progress()
+            self.status_var.set("エラー")
             messagebox.showerror("エラー", f"ページの抜き取りに失敗しました:\n{e}")
 
 
 def main():
-    """メイン関数"""
     root = tk.Tk()
     app = PDFManager(root)
 
-    # ウィンドウを中央に配置
+    # center window
     root.update_idletasks()
     x = (root.winfo_screenwidth() // 2) - (root.winfo_width() // 2)
     y = (root.winfo_screenheight() // 2) - (root.winfo_height() // 2)

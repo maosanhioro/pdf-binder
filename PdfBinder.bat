@@ -46,16 +46,16 @@ if %ERRORLEVEL% neq 0 (
     )
 )
 
-REM GUIアプリケーションを起動
-echo ✓ PdfBinderを起動しています...
-python pdfbinder_gui.py
+REM GUIアプリケーションを起動 (PySide6 実装)
+echo ✓ PdfBinder (PySide6) を起動しています...
+python app.py
 
 REM エラーが発生した場合の処理
 if %ERRORLEVEL% neq 0 (
     echo.
     echo ❌ エラーが発生しました
     echo 詳細なエラー情報を確認するため、以下のコマンドを実行してください:
-    echo python pdfbinder_gui.py
+    echo python app.py
     echo.
     pause
 )

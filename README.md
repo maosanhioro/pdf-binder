@@ -35,12 +35,12 @@ python -m venv .venv
 .\.venv\Scripts\activate
 
 # 必要なライブラリをインストール
-pip install PyPDF2 pyinstaller
+pip install PyPDF2 pyinstaller PySide6
 
-# GUI を直接実行
-python pdfbinder_gui.py
+# GUI を直接実行（PySide6 実装）
+python app.py
 
-# EXE を作成
+# EXE を作成（PySide6 ビルド）
 .\build_exe_windows.bat
 ```
 
@@ -144,18 +144,22 @@ python pdfbinder_gui.py
 
 ```
 📁 プロジェクトフォルダ/
-├── 📄 pdfbinder_gui.py            # GUIアプリケーション本体
-├── 📄 build_exe_windows.bat       # Windows用ビルドスクリプト
+├── 📄 app.py                      # PySide6 GUIアプリケーション本体
+├── 📄 ui_main.py                  # PySide6: メインウィンドウ
+├── 📄 ui_merge.py                 # PySide6: 結合ページ
+├── 📄 ui_extract.py               # PySide6: 抜き取りページ
+├── 📄 pdf_ops.py                  # PDF処理ロジック（再利用可能）
+├── 📄 build_exe_windows.bat       # Windows用ビルドスクリプト（app.py 用に更新）
 ├── 📄 README.md                   # このファイル
-├── 📄 Windows_Setup_Guide.md      # 開発環境セットアップ手順
-└── 📁 dist/
-    └── 📄 PdfBinder.exe           # 配布用実行ファイル
+├── 📄 Windows_Setup_Guide.md      # 開発環境セットアップ手順（更新済み）
+└── 📁 dist_ps6/
+  └── 📄 PdfBinder_PySide6.exe   # 配布用実行ファイル（PySide6 版）
 ```
 
 ## 技術仕様
 
 - **開発言語**: Python 3.13
-- **GUIライブラリ**: tkinter
+-- **GUIライブラリ**: PySide6 (Qt for Python)
 - **PDFライブラリ**: PyPDF2
 - **配布形式**: PyInstaller（単一実行ファイル）
 - **文字エンコーディング**: UTF-8 (Windows対応)

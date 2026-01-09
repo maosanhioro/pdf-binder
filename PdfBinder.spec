@@ -2,11 +2,10 @@
 
 
 a = Analysis(
-    ['pdfbinder_gui.py'],
-    pathex=['.'],
+    ['app.py'],
+    pathex=[],
     binaries=[],
-    # 同梱するドキュメント（配布パッケージで参照できるようにする）
-    datas=[('README.md','.'), ('Windows_Setup_Guide.md','.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -15,11 +14,8 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
-
-# PYZ: pure Python modules archive
 pyz = PYZ(a.pure)
 
-# EXE: application bundle
 exe = EXE(
     pyz,
     a.scripts,
@@ -30,7 +26,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,
+    upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
