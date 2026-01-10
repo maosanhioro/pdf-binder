@@ -92,5 +92,3 @@ def extract_pages(
         with open(out_path, "wb") as out_f:
             writer.write(out_f)
     return out_path
-    return out_path
-    return out_path

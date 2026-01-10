@@ -52,21 +52,3 @@ class ExtractPage(QWidget):
             return
         self.file_label.setText(f"選択ファイル: {path}")
         self.file_selected.emit(path)
-        from PySide6.QtWidgets import QFileDialog
-
-        path, _ = QFileDialog.getOpenFileName(
-            self, "PDFを選択", "", "PDF Files (*.pdf)"
-        )
-        if not path:
-            return
-        self.file_label.setText(f"選択ファイル: {path}")
-        self.file_selected.emit(path)
-        from PySide6.QtWidgets import QFileDialog
-
-        path, _ = QFileDialog.getOpenFileName(
-            self, "PDFを選択", "", "PDF Files (*.pdf)"
-        )
-        if not path:
-            return
-        self.file_label.setText(f"選択ファイル: {path}")
-        self.file_selected.emit(path)
