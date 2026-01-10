@@ -24,11 +24,11 @@ python --version
 
 echo.
 echo 必要なライブラリをインストール中...
-pip install PyPDF2 >nul 2>&1
+pip install PyPDF2 PySide6 >nul 2>&1
 if %ERRORLEVEL% equ 0 (
-    echo ✓ PyPDF2 インストール完了
+    echo ✓ ライブラリのインストール完了
 ) else (
-    echo ❌ PyPDF2 インストール失敗
+    echo ❌ ライブラリのインストールに失敗しました
     pause
     exit /b 1
 )
@@ -39,7 +39,7 @@ echo.
 echo PdfBinderを起動しますか？ (Y/N)
 set /p choice=
 if /i "%choice%"=="Y" (
-    python app.py
+    python pdfbinder_app.py
 )
 
 pause

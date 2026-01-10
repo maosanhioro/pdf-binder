@@ -15,9 +15,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import pdf_ops
-from ui_extract import ExtractPage
-from ui_merge import MergePage
+import pdf_operations
+from extract_page import ExtractPage
+from merge_page import MergePage
 
 
 class Worker(QObject):
@@ -234,7 +234,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "エラー", "2件以上のPDFを追加してください")
                 return
             self.start_worker(
-                pdf_ops.merge_pdfs, self.current_merge_files, out_dir, out_name
+                pdf_operations.merge_pdfs, self.current_merge_files, out_dir, out_name
             )
         else:
             # extract
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
             page_spec = self.extract_page.page_input.text()
             pw = self.extract_page.pw_input.text()
             self.start_worker(
-                pdf_ops.extract_pages,
+                pdf_operations.extract_pages,
                 self.current_extract_file,
                 page_spec,
                 pw,

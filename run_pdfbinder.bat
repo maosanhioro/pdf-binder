@@ -16,23 +16,23 @@ if %ERRORLEVEL% neq 0 (
     echo ❌ エラー: Pythonがインストールされていません
     echo.
     echo 解決方法:
-    echo 1. setup_and_run.bat を実行してセットアップ
+    echo 1. setup_windows.bat を実行してセットアップ
     echo 2. または https://www.python.org からPythonをインストール
     echo.
     pause
     exit /b 1
 )
 
-REM PyPDF2の確認
-python -c "import PyPDF2" >nul 2>&1
+REM PyPDF2 / PySide6の確認
+python -c "import PyPDF2, PySide6" >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo ❌ エラー: PyPDF2ライブラリがインストールされていません
+    echo ❌ エラー: 必要なライブラリがインストールされていません
     echo.
     echo 自動インストールを実行しますか？ (Y/N)
     set /p install_choice=
     if /i "%install_choice%"=="Y" (
-        echo PyPDF2をインストール中...
-        pip install PyPDF2
+        echo ライブラリをインストール中...
+        pip install PyPDF2 PySide6
         if %ERRORLEVEL% neq 0 (
             echo ❌ インストールに失敗しました
             pause
@@ -48,14 +48,14 @@ if %ERRORLEVEL% neq 0 (
 
 REM GUIアプリケーションを起動 (PySide6 実装)
 echo ✓ PdfBinder (PySide6) を起動しています...
-python app.py
+python pdfbinder_app.py
 
 REM エラーが発生した場合の処理
 if %ERRORLEVEL% neq 0 (
     echo.
     echo ❌ エラーが発生しました
     echo 詳細なエラー情報を確認するため、以下のコマンドを実行してください:
-    echo python app.py
+    echo python pdfbinder_app.py
     echo.
     pause
 )

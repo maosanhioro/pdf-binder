@@ -21,7 +21,7 @@ PDFファイルの結合とページ抜き取りを簡単な操作で行える�
 ## インストール・配布
 
 ### 🎯 EXEファイル配布（推奨）
-1. **Windows環境**で `build_exe_windows.bat` を実行してEXEファイルを作成
+1. **Windows環境**で `build_windows_exe.bat` を実行してEXEファイルを作成
 2. 作成された `dist/PdfBinder.exe` を配布
 3. **受け取った側はPythonのインストール不要**
 4. **Windows 11対応・文字化け対策済み**
@@ -38,10 +38,10 @@ python -m venv .venv
 pip install PyPDF2 pyinstaller PySide6
 
 # GUI を直接実行（PySide6 実装）
-python app.py
+python pdfbinder_app.py
 
 # EXE を作成（PySide6 ビルド）
-.\build_exe_windows.bat
+.\build_windows_exe.bat
 ```
 
 ### 📦 配布パッケージ
@@ -49,7 +49,7 @@ python app.py
 📁 配布用フォルダ/
 ├── 📄 PDF管理ツール.exe        # メインアプリケーション
 ├── 📄 README.md                # 使い方マニュアル
-└── 📄 Windows_Setup_Guide.md   # 開発者向けビルド手順
+└── 📄 WINDOWS_SETUP.md   # 開発者向けビルド手順
 ```
 
 ## 使い方
@@ -137,21 +137,21 @@ python app.py
 
 ### EXEファイルのビルドができない
 - Windows環境で実行しているか確認
-- `Windows_Setup_Guide.md` の手順に従ってセットアップ
+- `WINDOWS_SETUP.md` の手順に従ってセットアップ
 - Pythonとpyinstallerが正しくインストールされているか確認
 
 ## ファイル構成
 
 ```
 📁 プロジェクトフォルダ/
-├── 📄 app.py                      # PySide6 GUIアプリケーション本体
-├── 📄 ui_main.py                  # PySide6: メインウィンドウ
-├── 📄 ui_merge.py                 # PySide6: 結合ページ
-├── 📄 ui_extract.py               # PySide6: 抜き取りページ
-├── 📄 pdf_ops.py                  # PDF処理ロジック（再利用可能）
-├── 📄 build_exe_windows.bat       # Windows用ビルドスクリプト（app.py 用に更新）
+├── 📄 pdfbinder_app.py                      # PySide6 GUIアプリケーション本体
+├── 📄 main_window.py                  # PySide6: メインウィンドウ
+├── 📄 merge_page.py                 # PySide6: 結合ページ
+├── 📄 extract_page.py               # PySide6: 抜き取りページ
+├── 📄 pdf_operations.py                  # PDF処理ロジック（再利用可能）
+├── 📄 build_windows_exe.bat       # Windows用ビルドスクリプト（pdfbinder_app.py 用に更新）
 ├── 📄 README.md                   # このファイル
-├── 📄 Windows_Setup_Guide.md      # 開発環境セットアップ手順（更新済み）
+├── 📄 WINDOWS_SETUP.md      # 開発環境セットアップ手順（更新済み）
 └── 📁 dist_ps6/
   └── 📄 PdfBinder_PySide6.exe   # 配布用実行ファイル（PySide6 版）
 ```
