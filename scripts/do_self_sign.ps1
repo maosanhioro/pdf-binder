@@ -30,9 +30,9 @@ if ($null -eq $cert) {
     exit 1
 }
 
-Write-Output "Signing dist_ps6\\PdfBinder_PySide6.exe with Set-AuthenticodeSignature (no timestamp)..."
+Write-Output "Signing dist\PdfBinder.exe with Set-AuthenticodeSignature (no timestamp)..."
 try {
-    $sig = Set-AuthenticodeSignature -FilePath ".\dist_ps6\PdfBinder_PySide6.exe" -Certificate $cert -HashAlgorithm 'SHA256' -ErrorAction Stop
+    $sig = Set-AuthenticodeSignature -FilePath ".\dist\PdfBinder.exe" -Certificate $cert -HashAlgorithm 'SHA256' -ErrorAction Stop
 }
 catch {
     Write-Error "Set-AuthenticodeSignature failed: $_"
@@ -42,7 +42,7 @@ catch {
 $sig | Format-List
 
 Write-Output "Verification result:"
-$verify = Get-AuthenticodeSignature ".\dist_ps6\PdfBinder_PySide6.exe"
+$verify = Get-AuthenticodeSignature ".\dist\PdfBinder.exe"
 $verify | Format-List
 
 if ($verify.Status -ne 'Valid') {

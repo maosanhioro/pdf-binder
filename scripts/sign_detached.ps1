@@ -6,8 +6,8 @@ Usage:
   .\sign_detached.ps1 -FilePath .\dist\PdfBinder.exe -OutFile .\dist\PdfBinder.exe.sha256
 #>
 param(
-    [string]$FilePath = ".\dist_ps6\PdfBinder_PySide6.exe",
-    [string]$OutFile = ".\dist_ps6\PdfBinder_PySide6.exe.sha256"
+    [string]$FilePath = ".\dist\PdfBinder.exe",
+    [string]$OutFile = ".\dist\PdfBinder.exe.sha256"
 )
 
 if (-not (Test-Path $FilePath)) { Write-Error "File not found: $FilePath"; exit 1 }

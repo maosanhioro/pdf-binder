@@ -16,7 +16,7 @@ if %ERRORLEVEL% neq 0 (
     echo ❌ エラー: Pythonがインストールされていません
     echo.
     echo 解決方法:
-    echo 1. setup_windows.bat を実行してセットアップ
+    echo 1. setup.bat を実行してセットアップ
     echo 2. または https://www.python.org からPythonをインストール
     echo.
     pause
@@ -46,16 +46,16 @@ if %ERRORLEVEL% neq 0 (
     )
 )
 
-REM GUIアプリケーションを起動 (PySide6 実装)
-echo ✓ PdfBinder (PySide6) を起動しています...
-python pdfbinder_app.py
+REM GUIアプリケーションを起動
+echo ✓ PdfBinder を起動しています...
+python pdfbinder.py
 
 REM エラーが発生した場合の処理
 if %ERRORLEVEL% neq 0 (
     echo.
     echo ❌ エラーが発生しました
     echo 詳細なエラー情報を確認するため、以下のコマンドを実行してください:
-    echo python pdfbinder_app.py
+    echo python pdfbinder.py
     echo.
     pause
 )

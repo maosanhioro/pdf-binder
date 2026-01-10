@@ -2,7 +2,7 @@
 Sign an executable using a PFX file (signtool recommended).
 
 Usage:
-  .\sign_with_pfx.ps1 -PfxPath .\certs\pdfbinder_self.pfx -Password (ConvertTo-SecureString -String 'pass' -AsPlainText -Force) -FilePath .\dist_ps6\PdfBinder_PySide6.exe
+  .\sign_with_pfx.ps1 -PfxPath .\certs\pdfbinder_self.pfx -Password (ConvertTo-SecureString -String 'pass' -AsPlainText -Force) -FilePath .\dist\PdfBinder.exe
 
 If `signtool` is available (Windows SDK), it will be used. Otherwise the script will try `osslsigncode` if installed.
 #>

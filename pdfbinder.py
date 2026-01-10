@@ -9,6 +9,8 @@ def main():
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
+    win.raise_()
+    win.activateWindow()
     sys.exit(app.exec())
 
 

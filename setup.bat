@@ -39,7 +39,7 @@ echo.
 echo PdfBinderを起動しますか？ (Y/N)
 set /p choice=
 if /i "%choice%"=="Y" (
-    python pdfbinder_app.py
+    python pdfbinder.py
 )
 
 pause
