@@ -43,7 +43,6 @@ def main():
                 frame.moveCenter(geometry.center())
                 win.move(frame.topLeft())
             win.showNormal()
-            win.setWindowState((win.windowState() & ~Qt.WindowMinimized) | Qt.WindowActive)
             win.raise_()
             win.activateWindow()
             log_line(f"window visible={win.isVisible()} state={win.windowState()}")
