@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         nav = QVBoxLayout()
         nav.setSpacing(12)
         self.btn_merge = QPushButton("まとめる")
-        self.btn_extract = QPushButton("抜き出す")
+        self.btn_extract = QPushButton("抜き出し")
         self.btn_merge.setCheckable(True)
         self.btn_extract.setCheckable(True)
         self.btn_merge.setChecked(True)
@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentIndex(index)
         self.btn_merge.setChecked(index == 0)
         self.btn_extract.setChecked(index == 1)
-        self.exec_btn.setText("まとめる" if index == 0 else "抜き出す")
+        self.exec_btn.setText("まとめる" if index == 0 else "抜き出し")
 
     @Slot(list)
     def on_merge_files_changed(self, files):
