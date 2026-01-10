@@ -39,13 +39,19 @@ def main():
             screen = QGuiApplication.primaryScreen()
             if screen:
                 geometry = screen.availableGeometry()
-                frame = win.frameGeometry()
-                frame.moveCenter(geometry.center())
-                win.move(frame.topLeft())
+                width = min(win.width(), geometry.width())
+                height = min(win.height(), geometry.height())
+                left = geometry.x() + (geometry.width() - width) // 2
+                top = geometry.y() + (geometry.height() - height) // 2
+                win.setGeometry(left, top, width, height)
             win.showNormal()
             win.raise_()
             win.activateWindow()
-            log_line(f"window visible={win.isVisible()} state={win.windowState()}")
+            if screen:
+                log_line(
+                    "window visible="
+                    f"{win.isVisible()} state={win.windowState()} geometry={win.geometry()}"
+                )
 
         bring_to_front()
         QTimer.singleShot(250, bring_to_front)
