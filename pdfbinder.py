@@ -45,6 +45,10 @@ def main():
                 top = geometry.y() + (geometry.height() - height) // 2
                 win.setGeometry(left, top, width, height)
             win.showNormal()
+            win.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+            win.show()
+            win.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            win.show()
             win.raise_()
             win.activateWindow()
             if screen:
