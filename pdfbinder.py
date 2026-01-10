@@ -3,6 +3,7 @@ import sys
 import traceback
 from datetime import datetime
 
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QApplication
 
 from main_window import MainWindow
@@ -30,9 +31,18 @@ def main():
         win = MainWindow()
         log_line("window created")
         win.show()
-        win.raise_()
-        win.activateWindow()
-        log_line(f"window visible={win.isVisible()}")
+
+        def bring_to_front() -> None:
+            if not win.isVisible():
+                win.show()
+            win.showNormal()
+            win.setWindowState((win.windowState() & ~Qt.WindowMinimized) | Qt.WindowActive)
+            win.raise_()
+            win.activateWindow()
+            log_line(f"window visible={win.isVisible()} state={int(win.windowState())}")
+
+        bring_to_front()
+        QTimer.singleShot(250, bring_to_front)
         sys.exit(app.exec())
     except Exception:
         log_line("exception")
