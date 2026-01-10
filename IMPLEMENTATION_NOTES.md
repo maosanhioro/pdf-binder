@@ -1,4 +1,4 @@
-# 実装ノート — PdfBinder
+﻿# 実装ノート — PdfBinder
 
 ## 概要
 このプロジェクトは当初 `tkinter` ベースの GUI (`pdfbinder_gui.py`) として始まりましたが、機能の拡張とモダンな見た目のため、`PySide6`（Qt for Python）への移行が行われました。

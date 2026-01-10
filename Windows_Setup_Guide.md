@@ -1,4 +1,4 @@
-# Windows環境でのPdfBinder セットアップ手順
+﻿# Windows環境でのPdfBinder セットアップ手順
 
 ## 前提条件
 - Windows 11 (または Windows 10)
