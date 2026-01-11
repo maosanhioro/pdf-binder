@@ -131,9 +131,7 @@ class MainWindow(QMainWindow):
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
         self.progress.hide()
-        self.status = QLabel("準備完了")
         bottom.addWidget(self.progress)
-        bottom.addWidget(self.status)
 
         left_widget = QWidget()
         left_widget.setLayout(nav)
@@ -229,17 +227,17 @@ class MainWindow(QMainWindow):
         self.worker.error.connect(self.thread.quit)
         self.thread.start()
         self.progress.show()
-        self.status.setText("処理中...")
 
     @Slot(str)
     def on_finished(self, out_path: str):
         self.progress.hide()
-        self.status.setText(f"完了: {os.path.basename(out_path)}")
+        QMessageBox.information(
+            self, "完了", f"{os.path.basename(out_path)} を作成しました。"
+        )
 
     @Slot(str)
     def on_error(self, msg: str):
         self.progress.hide()
-        self.status.setText("エラー")
         QMessageBox.critical(self, "エラー", msg)
 
     def on_execute(self):
