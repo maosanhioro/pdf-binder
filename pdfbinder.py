@@ -39,7 +39,7 @@ def main():
             win.setWindowState((win.windowState() & ~Qt.WindowMinimized) | Qt.WindowActive)
             win.raise_()
             win.activateWindow()
-            log_line(f"window visible={win.isVisible()} state={win.windowState()}")
+            log_line(f"window visible={win.isVisible()} state={int(win.windowState())}")
 
         bring_to_front()
         QTimer.singleShot(250, bring_to_front)
