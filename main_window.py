@@ -50,19 +50,28 @@ class MainWindow(QMainWindow):
         # create layouts without parent to avoid parent-warning when nesting
         root = QHBoxLayout()
 
-        # left nav
-        nav = QVBoxLayout()
-        nav.setSpacing(12)
+        # mode selector
         self.btn_merge = QPushButton("まとめる")
         self.btn_extract = QPushButton("抜き出し")
         self.btn_merge.setCheckable(True)
         self.btn_extract.setCheckable(True)
         self.btn_merge.setChecked(True)
-        # enlarge nav buttons for non-IT users
         for b in (self.btn_merge, self.btn_extract):
-            b.setMinimumHeight(48)
-            b.setStyleSheet("font-size:14px; padding:8px 12px;")
-            nav.addWidget(b)
+            b.setMinimumHeight(40)
+            b.setCheckable(True)
+        self.btn_merge.setObjectName("segmentLeft")
+        self.btn_extract.setObjectName("segmentRight")
+        mode_style = (
+            "QPushButton {"
+            "font-size:14px; padding:6px 14px;"
+            "border:1px solid #D1D5DB; background:#F9FAFB;}"
+            "QPushButton:checked {"
+            "background:#2B7CD3; color:white; border-color:#2B7CD3;}"
+            "#segmentLeft { border-top-left-radius:8px; border-bottom-left-radius:8px; }"
+            "#segmentRight { border-top-right-radius:8px; border-bottom-right-radius:8px; }"
+        )
+        self.btn_merge.setStyleSheet(mode_style)
+        self.btn_extract.setStyleSheet(mode_style)
 
         # center stacked
         self.stack = QStackedWidget()
@@ -133,10 +142,14 @@ class MainWindow(QMainWindow):
         self.progress.hide()
         bottom.addWidget(self.progress)
 
-        left_widget = QWidget()
-        left_widget.setLayout(nav)
         center_widget = QWidget()
         center_layout = QVBoxLayout(center_widget)
+        mode_row = QHBoxLayout()
+        mode_row.addStretch(1)
+        mode_row.addWidget(self.btn_merge)
+        mode_row.addWidget(self.btn_extract)
+        mode_row.addStretch(1)
+        center_layout.addLayout(mode_row)
         center_layout.addWidget(self.stack)
 
         right_widget = QWidget()
@@ -144,10 +157,8 @@ class MainWindow(QMainWindow):
         # limit right pane width to keep it no wider than the PDF list area
         right_widget.setMaximumWidth(320)
 
-        root.addWidget(left_widget, 0)
         root.addWidget(center_widget, 1)
         root.addWidget(right_widget, 0)
-        root.setAlignment(left_widget, Qt.AlignTop)
         root.setAlignment(right_widget, Qt.AlignTop)
 
         # main vertical layout (central owns it)
