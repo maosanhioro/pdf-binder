@@ -24,7 +24,7 @@ echo Building EXE (this may take a few minutes)...
 if exist "dist\PdfBinder.exe" del "dist\PdfBinder.exe"
 if exist "build" rmdir /s /q "build"
 
-%PYTHON_EXE% -m PyInstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath build pdfbinder.py
+%PYTHON_EXE% -m PyInstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath build --icon "assets\pdfbinder.ico" pdfbinder.py
 
 if %ERRORLEVEL% equ 0 (
     echo Build completed: dist\PdfBinder.exe

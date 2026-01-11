@@ -1,4 +1,4 @@
-# PdfBinder
+﻿# PdfBinder
 
 ## 概要
 PdfBinder は、複数PDFの結合とページ抽出を、迷わず操作できるGUIで提供するツールです。
@@ -64,7 +64,7 @@ python pdfbinder.py
 
 ## ビルド（開発者向け）
 ```powershell
-pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath build pdfbinder.py
+pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath build --icon "assets/pdfbinder.ico" pdfbinder.py
 ```
 
 ## 署名（任意・ビルド担当者向け）
@@ -75,6 +75,8 @@ pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath b
 ## フォルダ構成
 ```
 project/
+├── assets/
+│  └── pdfbinder.ico
 ├── pdfbinder.py
 ├── main_window.py
 ├── merge_page.py
