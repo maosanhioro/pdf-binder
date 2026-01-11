@@ -69,6 +69,20 @@ class MergePage(QWidget):
         label.setStyleSheet("font-size:13px;")
         row_layout.addWidget(label, 1)
 
+        btn_up = QPushButton("▲")
+        btn_up.setMinimumHeight(30)
+        btn_up.setFixedWidth(28)
+        btn_up.setStyleSheet("font-size:10px; padding:2px;")
+        btn_up.clicked.connect(lambda _, it=item: self._move_item(it, -1))
+        row_layout.addWidget(btn_up, 0)
+
+        btn_down = QPushButton("▼")
+        btn_down.setMinimumHeight(30)
+        btn_down.setFixedWidth(28)
+        btn_down.setStyleSheet("font-size:10px; padding:2px;")
+        btn_down.clicked.connect(lambda _, it=item: self._move_item(it, 1))
+        row_layout.addWidget(btn_down, 0)
+
         remove_btn = QPushButton("削除")
         remove_btn.setMinimumHeight(30)
         remove_btn.setStyleSheet("font-size:12px; padding:4px 10px;")
@@ -79,6 +93,21 @@ class MergePage(QWidget):
 
     def _remove_item(self, item: QListWidgetItem) -> None:
         self.list_widget.takeItem(self.list_widget.row(item))
+        self.emit_files()
+
+    def _move_item(self, item: QListWidgetItem, delta: int) -> None:
+        current = self.list_widget.row(item)
+        target = current + delta
+        if target < 0 or target >= self.list_widget.count():
+            return
+        widget = self.list_widget.itemWidget(item)
+        path = item.data(Qt.UserRole)
+        self.list_widget.takeItem(current)
+        new_item = QListWidgetItem()
+        new_item.setSizeHint(QSize(0, 40))
+        new_item.setData(Qt.UserRole, path)
+        self.list_widget.insertItem(target, new_item)
+        self.list_widget.setItemWidget(new_item, widget)
         self.emit_files()
 
     def on_clear(self):
