@@ -182,7 +182,7 @@ class MainWindow(QMainWindow):
 
     @Slot(str)
     def on_extract_file_selected(self, path):
-        self.current_extract_file = path
+        self.current_extract_file = path if path else None
 
     def on_choose_dir(self):
         d = QFileDialog.getExistingDirectory(self, "出力先を選択", os.getcwd())
