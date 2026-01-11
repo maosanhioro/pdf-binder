@@ -42,7 +42,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PdfBinder")
+        self.setWindowTitle("PdfBinder — 複数PDFの結合／ページ抽出")
         self.resize(1000, 700)
 
         central = QWidget()
