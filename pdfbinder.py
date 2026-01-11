@@ -4,7 +4,7 @@ import traceback
 from datetime import datetime
 
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QCursor, QGuiApplication
 from PySide6.QtWidgets import QApplication
 
 from main_window import MainWindow
@@ -36,7 +36,9 @@ def main():
         def bring_to_front() -> None:
             if not win.isVisible():
                 win.show()
-            screen = QGuiApplication.primaryScreen()
+            screen = QGuiApplication.screenAt(QCursor.pos())
+            if not screen:
+                screen = QGuiApplication.primaryScreen()
             if screen:
                 geometry = screen.availableGeometry()
                 width = min(win.width(), geometry.width())
@@ -44,11 +46,10 @@ def main():
                 left = geometry.x() + (geometry.width() - width) // 2
                 top = geometry.y() + (geometry.height() - height) // 2
                 win.setGeometry(left, top, width, height)
+            state = win.windowState()
+            if state & Qt.WindowMinimized:
+                win.setWindowState(state & ~Qt.WindowMinimized)
             win.showNormal()
-            win.setWindowFlag(Qt.WindowStaysOnTopHint, True)
-            win.show()
-            win.setWindowFlag(Qt.WindowStaysOnTopHint, False)
-            win.show()
             win.raise_()
             win.activateWindow()
             if screen:
