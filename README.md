@@ -67,6 +67,11 @@ python pdfbinder.py
 pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath build pdfbinder.py
 ```
 
+## 署名（任意・ビルド担当者向け）
+署名はビルド担当者が選択します。署名しない場合は、配布先で警告が出やすくなります。
+`scripts/` に自己署名用のスクリプトがありますが、秘密鍵（`.pfx`）は含まれていないため、
+利用する場合はビルド担当者が別途作成・管理してください。
+
 ## フォルダ構成
 ```
 project/
