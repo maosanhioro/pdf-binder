@@ -29,6 +29,15 @@ def main():
         log_line("start")
         app = QApplication(sys.argv)
         log_line("qapp created")
+        screens = QGuiApplication.screens()
+        if screens:
+            for idx, s in enumerate(screens):
+                geo = s.availableGeometry()
+                log_line(
+                    f"screen[{idx}] name={s.name()} geo={geo} "
+                    f"dpi={s.logicalDotsPerInch():.2f}"
+                )
+        log_line(f"cursor pos={QCursor.pos()}")
         win = MainWindow()
         log_line("window created")
         win.show()
