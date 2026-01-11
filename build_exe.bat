@@ -28,13 +28,9 @@ if exist "build" rmdir /s /q "build"
 
 if %ERRORLEVEL% equ 0 (
     echo Build completed: dist\PdfBinder.exe
-    echo Open dist folder? (Y/N)
-    set /p choice=
-    if /i "%choice%"=="Y" explorer dist
-) else (
-    echo Build failed.
-    pause
-    exit /b 1
+    if /i "%OPEN_DIST%"=="1" explorer dist
+    exit /b 0
 )
 
-pause
+echo Build failed.
+exit /b 1
