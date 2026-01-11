@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QSizePolicy,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -93,17 +94,18 @@ class MainWindow(QMainWindow):
 
         # output dir row: lineedit + browse
         dir_row = QHBoxLayout()
+        dir_row.setSpacing(8)
         self.output_dir = QLineEdit(os.getcwd())
-        # keep output field narrower than the PDF list area
-        self.output_dir.setMinimumWidth(280)
         self.output_dir.setMinimumHeight(36)
         self.output_dir.setStyleSheet("font-size:13px; padding:8px;")
+        self.output_dir.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         btn_browse = QPushButton("参照")
+        btn_browse.setFixedWidth(72)
         btn_browse.setMinimumHeight(36)
         btn_browse.setStyleSheet("font-size:13px;")
         btn_browse.clicked.connect(self.on_choose_dir)
-        dir_row.addWidget(self.output_dir)
-        dir_row.addWidget(btn_browse)
+        dir_row.addWidget(self.output_dir, 1)
+        dir_row.addWidget(btn_browse, 0)
         action.addLayout(dir_row)
 
         lbl_name = QLabel("出力名")
