@@ -4,7 +4,6 @@ import traceback
 from datetime import datetime
 
 from PySide6.QtCore import QTimer, Qt
-from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QApplication
 
 from main_window import MainWindow
@@ -36,12 +35,6 @@ def main():
         def bring_to_front() -> None:
             if not win.isVisible():
                 win.show()
-            screen = QGuiApplication.primaryScreen()
-            if screen:
-                geometry = screen.availableGeometry()
-                frame = win.frameGeometry()
-                frame.moveCenter(geometry.center())
-                win.move(frame.topLeft())
             win.showNormal()
             win.setWindowState((win.windowState() & ~Qt.WindowMinimized) | Qt.WindowActive)
             win.raise_()
