@@ -58,7 +58,9 @@ class MergePage(QWidget):
         item.setSizeHint(QSize(0, 40))
         item.setData(Qt.UserRole, path)
         self.list_widget.addItem(item)
+        self.list_widget.setItemWidget(item, self._create_row(item, path))
 
+    def _create_row(self, item: QListWidgetItem, path: str) -> QWidget:
         row = QWidget()
         row_layout = QHBoxLayout(row)
         row_layout.setContentsMargins(8, 0, 8, 0)
@@ -89,7 +91,7 @@ class MergePage(QWidget):
         remove_btn.clicked.connect(lambda _, it=item: self._remove_item(it))
         row_layout.addWidget(remove_btn, 0)
 
-        self.list_widget.setItemWidget(item, row)
+        return row
 
     def _remove_item(self, item: QListWidgetItem) -> None:
         self.list_widget.takeItem(self.list_widget.row(item))
@@ -100,14 +102,13 @@ class MergePage(QWidget):
         target = current + delta
         if target < 0 or target >= self.list_widget.count():
             return
-        widget = self.list_widget.itemWidget(item)
         path = item.data(Qt.UserRole)
         self.list_widget.takeItem(current)
         new_item = QListWidgetItem()
         new_item.setSizeHint(QSize(0, 40))
         new_item.setData(Qt.UserRole, path)
         self.list_widget.insertItem(target, new_item)
-        self.list_widget.setItemWidget(new_item, widget)
+        self.list_widget.setItemWidget(new_item, self._create_row(new_item, path))
         self.emit_files()
 
     def on_clear(self):
