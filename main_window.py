@@ -1,7 +1,6 @@
 import os
-from datetime import datetime
 
-from PySide6.QtCore import QEvent, QObject, Qt, QThread, Signal, Slot
+from PySide6.QtCore import QObject, Qt, QThread, Signal, Slot
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
@@ -45,7 +44,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("PdfBinder")
         self.resize(1000, 700)
-        self._log_event("init")
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -253,36 +251,3 @@ class MainWindow(QMainWindow):
                 out_dir,
                 out_name,
             )
-
-    def _log_event(self, label: str) -> None:
-        if not os.environ.get("PDFBINDER_LOG"):
-            return
-        try:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            log_path = os.path.join(os.path.dirname(__file__), "pdfbinder.log")
-            message = (
-                f"[{timestamp}] window event={label} "
-                f"visible={self.isVisible()} state={self.windowState()} "
-                f"geometry={self.geometry()}"
-            )
-            with open(log_path, "a", encoding="utf-8") as handle:
-                handle.write(f"{message}\n")
-        except Exception:
-            pass
-
-    def showEvent(self, event):
-        self._log_event("show")
-        super().showEvent(event)
-
-    def hideEvent(self, event):
-        self._log_event("hide")
-        super().hideEvent(event)
-
-    def closeEvent(self, event):
-        self._log_event("close")
-        super().closeEvent(event)
-
-    def changeEvent(self, event):
-        if event.type() == QEvent.WindowStateChange:
-            self._log_event("state")
-        super().changeEvent(event)
