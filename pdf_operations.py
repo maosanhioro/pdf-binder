@@ -4,16 +4,6 @@ from typing import List
 import PyPDF2
 
 
-def unique_path(path: str) -> str:
-    base, ext = os.path.splitext(path)
-    candidate = path
-    i = 2
-    while os.path.exists(candidate):
-        candidate = f"{base} ({i}){ext}"
-        i += 1
-    return candidate
-
-
 def parse_page_spec(spec: str, total_pages: int) -> List[int]:
     if not spec:
         raise ValueError("空のページ指定")
@@ -60,7 +50,6 @@ def merge_pdfs(file_paths: List[str], output_dir: str, output_name: str) -> str:
                 if getattr(reader, "is_encrypted", False):
                     raise RuntimeError(f"{os.path.basename(p)} は暗号化されています")
                 merger.append(reader)
-        out_path = unique_path(out_path)
         with open(out_path, "wb") as out_f:
             merger.write(out_f)
     finally:
@@ -88,7 +77,6 @@ def extract_pages(
         writer = PyPDF2.PdfWriter()
         for p in pages:
             writer.add_page(reader.pages[p - 1])
-        out_path = unique_path(out_path)
         with open(out_path, "wb") as out_f:
             writer.write(out_f)
     return out_path

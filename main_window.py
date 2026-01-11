@@ -189,14 +189,34 @@ class MainWindow(QMainWindow):
         if d:
             self.output_dir.setText(d)
 
+    def _normalize_output_name(self, name: str) -> str:
+        trimmed = (name or "").strip()
+        if not trimmed:
+            return ""
+        if trimmed.lower().endswith(".pdf"):
+            return trimmed
+        return f"{trimmed}.pdf"
+
     def _update_preview(self):
         out_dir = self.output_dir.text() or os.getcwd()
-        out_name = self.output_name.text() or "output.pdf"
+        out_name = self._normalize_output_name(self.output_name.text()) or "output.pdf"
         full = os.path.join(out_dir, out_name)
         # shorten if too long
         if len(full) > 80:
             full = "..." + full[-77:]
         self.preview.setText(f"出力: {full}")
+
+    def _confirm_overwrite(self, out_path: str) -> bool:
+        if not os.path.exists(out_path):
+            return True
+        reply = QMessageBox.question(
+            self,
+            "上書き確認",
+            f"同名のファイルが存在します。\n上書きしますか？\n\n{out_path}",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        return reply == QMessageBox.Yes
 
     def start_worker(self, fn, *args, **kwargs):
         self.thread = QThread()
@@ -225,9 +245,11 @@ class MainWindow(QMainWindow):
     def on_execute(self):
         idx = self.stack.currentIndex()
         out_dir = self.output_dir.text() or os.getcwd()
-        out_name = self.output_name.text() or (
-            "merged.pdf" if idx == 0 else "extracted.pdf"
-        )
+        default_name = "merged.pdf" if idx == 0 else "extracted.pdf"
+        out_name = self._normalize_output_name(self.output_name.text()) or default_name
+        out_path = os.path.join(out_dir, out_name)
+        if not self._confirm_overwrite(out_path):
+            return
         if idx == 0:
             # merge
             if len(self.current_merge_files) < 2:
