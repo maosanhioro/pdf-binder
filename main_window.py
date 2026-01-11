@@ -155,7 +155,7 @@ class MainWindow(QMainWindow):
         right_widget = QWidget()
         right_widget.setLayout(action)
         # limit right pane width to keep it no wider than the PDF list area
-        right_widget.setMaximumWidth(320)
+        right_widget.setMaximumWidth(380)
 
         root.addWidget(center_widget, 1)
         root.addWidget(right_widget, 0)
