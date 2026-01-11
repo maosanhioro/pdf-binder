@@ -1,4 +1,4 @@
-﻿# PdfBinder
+# PdfBinder
 
 ## 概要
 PDFファイルの結合とページ抜き取りを簡単な操作で行えるツールです。
@@ -6,12 +6,12 @@ PDFファイルの結合とページ抜き取りを簡単な操作で行える�
 
 ## 機能
 
-### 🔄 PDF結合
+### PDF結合
 - 複数のPDFファイルを1つのファイルに結合
 - ファイルの選択は一覧から複数選択可能
 - 出力ファイル名を自由に設定可能
 
-### ✂️ ページ抜き取り
+### ページ抜き取り
 - PDFファイルから指定したページを抜き取って新しいPDFを作成
 - 柔軟なページ指定方法をサポート
   - 単一ページ: `1,3,5`
@@ -20,13 +20,13 @@ PDFファイルの結合とページ抜き取りを簡単な操作で行える�
 
 ## インストール・配布
 
-### 🎯 EXEファイル配布（推奨）
+### EXEファイル配布（推奨）
 1. `build_exe.bat` を実行してEXEファイルを作成
 2. 作成された `dist/PdfBinder.exe` を配布
 3. **受け取った側はPythonのインストール不要**
 4. **Windows 11対応・文字化け対策済み**
 
-### 🔧 開発者向け（Windows）
+### 開発者向け（Windows）
 Windows 上での開発・テスト手順（最小）:
 
 ```powershell
@@ -35,7 +35,7 @@ python -m venv .venv
 .\.venv\Scripts\activate
 
 # 必要なライブラリをインストール
-pip install PyPDF2 pyinstaller PySide6
+pip install -r requirements.txt
 
 # GUI を直接実行
 python pdfbinder.py
@@ -44,12 +44,12 @@ python pdfbinder.py
 .\build_exe.bat
 ```
 
-### 📦 配布パッケージ
+### 配布パッケージ
 ```
-📁 配布用フォルダ/
-├── 📄 PDF管理ツール.exe        # メインアプリケーション
-├── 📄 README.md                # 使い方マニュアル
-└── 📄 SETUP.md   # 開発者向けビルド手順
+配布用フォルダ/
+├── PDF管理ツール.exe        # メインアプリケーション
+├── README.md                # 使い方マニュアル
+└── SETUP.md                 # 開発者向けビルド手順
 ```
 
 ## 使い方
@@ -109,7 +109,7 @@ python pdfbinder.py
 
 - **Windows 11** (推奨・文字化け対策済み)
 - **Windows 10** (サポート)
-- または Python 3.6以降 + 必要ライブラリ
+- または Python 3.8以降 + 必要ライブラリ
 
 ## トラブルシューティング
 
@@ -143,27 +143,27 @@ python pdfbinder.py
 ## ファイル構成
 
 ```
-📁 プロジェクトフォルダ/
-├── 📄 pdfbinder.py                      # GUIアプリケーション本体
-├── 📄 main_window.py                  # メインウィンドウ
-├── 📄 merge_page.py                 # 結合ページ
-├── 📄 extract_page.py               # 抜き取りページ
-├── 📄 pdf_operations.py                  # PDF処理ロジック（再利用可能）
-├── 📄 build_exe.bat       # ビルドスクリプト（pdfbinder.py 用に更新）
-├── 📄 README.md                   # このファイル
-├── 📄 SETUP.md      # 開発環境セットアップ手順（更新済み）
-└── 📁 dist/
-  └── 📄 PdfBinder.exe   # 配布用実行ファイル
+プロジェクトフォルダ/
+├── pdfbinder.py           # GUIアプリケーション本体
+├── main_window.py         # メインウィンドウ
+├── merge_page.py          # 結合ページ
+├── extract_page.py        # 抜き取りページ
+├── pdf_operations.py      # PDF処理ロジック（再利用可能）
+├── build_exe.bat          # ビルドスクリプト
+├── README.md              # このファイル
+├── SETUP.md               # 開発環境セットアップ手順
+└── dist/
+  └── PdfBinder.exe        # 配布用実行ファイル
 ```
 
 ## 技術仕様
 
-- **開発言語**: Python 3.13
--- **GUIライブラリ**: PySide6 (Qt for Python)
+- **開発言語**: Python 3.8以降
+- **GUIライブラリ**: PySide6 (Qt for Python)
 - **PDFライブラリ**: PyPDF2
 - **配布形式**: PyInstaller（単一実行ファイル）
 - **文字エンコーディング**: UTF-8 (Windows対応)
--- **対応フォント**: Yu Gothic UI (Windows)
+- **対応フォント**: Yu Gothic UI (Windows)
 
 ## 更新履歴
 

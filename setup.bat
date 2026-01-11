@@ -8,7 +8,7 @@ echo.
 echo Pythonがインストールされているか確認中...
 python --version >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo ❌ Pythonがインストールされていません
+    echo ! Pythonがインストールされていません
     echo.
     echo Pythonをインストールしてください:
     echo 1. https://www.python.org/downloads/ にアクセス
@@ -19,27 +19,35 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-echo ✓ Pythonが見つかりました
+echo ! Pythonが見つかりました
 python --version
+
+set PYTHON_EXE=python
+if not exist ".venv\Scripts\python.exe" (
+    echo.
+    echo 仮想環境を作成します...
+    python -m venv .venv
+)
+if exist ".venv\Scripts\python.exe" set PYTHON_EXE=.venv\Scripts\python.exe
 
 echo.
 echo 必要なライブラリをインストール中...
-pip install PyPDF2 PySide6 >nul 2>&1
+%PYTHON_EXE% -m pip install -r requirements.txt >nul 2>&1
 if %ERRORLEVEL% equ 0 (
-    echo ✓ ライブラリのインストール完了
+    echo ! ライブラリのインストール完了
 ) else (
-    echo ❌ ライブラリのインストールに失敗しました
+    echo ! ライブラリのインストールに失敗しました
     pause
     exit /b 1
 )
 
 echo.
-echo ✓ セットアップ完了！
+echo ! セットアップ完了！
 echo.
 echo PdfBinderを起動しますか？ (Y/N)
 set /p choice=
 if /i "%choice%"=="Y" (
-    python pdfbinder.py
+    %PYTHON_EXE% pdfbinder.py
 )
 
 pause

@@ -10,10 +10,13 @@ echo      PdfBinder 起動中...
 echo ================================
 echo.
 
+set PYTHON_EXE=python
+if exist ".venv\Scripts\python.exe" set PYTHON_EXE=.venv\Scripts\python.exe
+
 REM Pythonの確認
-python --version >nul 2>&1
+%PYTHON_EXE% --version >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo ❌ エラー: Pythonがインストールされていません
+    echo ! エラー: Pythonがインストールされていません
     echo.
     echo 解決方法:
     echo 1. setup.bat を実行してセットアップ
@@ -24,21 +27,21 @@ if %ERRORLEVEL% neq 0 (
 )
 
 REM PyPDF2 / PySide6の確認
-python -c "import PyPDF2, PySide6" >nul 2>&1
+%PYTHON_EXE% -c "import PyPDF2, PySide6" >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo ❌ エラー: 必要なライブラリがインストールされていません
+    echo ! エラー: 必要なライブラリがインストールされていません
     echo.
     echo 自動インストールを実行しますか？ (Y/N)
     set /p install_choice=
     if /i "%install_choice%"=="Y" (
         echo ライブラリをインストール中...
-        pip install PyPDF2 PySide6
+        %PYTHON_EXE% -m pip install -r requirements.txt
         if %ERRORLEVEL% neq 0 (
-            echo ❌ インストールに失敗しました
+            echo ! インストールに失敗しました
             pause
             exit /b 1
         )
-        echo ✓ インストール完了
+        echo ! インストール完了
     ) else (
         echo セットアップがキャンセルされました
         pause
@@ -47,15 +50,15 @@ if %ERRORLEVEL% neq 0 (
 )
 
 REM GUIアプリケーションを起動
-echo ✓ PdfBinder を起動しています...
-python pdfbinder.py
+echo ! PdfBinder を起動しています...
+%PYTHON_EXE% pdfbinder.py
 
 REM エラーが発生した場合の処理
 if %ERRORLEVEL% neq 0 (
     echo.
-    echo ❌ エラーが発生しました
+    echo ! エラーが発生しました
     echo 詳細なエラー情報を確認するため、以下のコマンドを実行してください:
-    echo python pdfbinder.py
+    echo %PYTHON_EXE% pdfbinder.py
     echo.
     pause
 )

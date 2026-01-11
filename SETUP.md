@@ -15,7 +15,9 @@
 ## 2. 必要なライブラリのインストール
 コマンドプロンプトまたはPowerShellで以下を実行：
 ```powershell
-pip install PyPDF2 PySide6 pyinstaller
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ## 3. ソースファイルの準備
@@ -44,15 +46,15 @@ pyinstaller --onefile --windowed --name "PdfBinder" --distpath dist --workpath b
 
 ### pipが認識されない
 ```powershell
-python -m pip install PyPDF2 PySide6 pyinstaller
+python -m pip install -r requirements.txt
 ```
 
 ### ビルドエラーが発生する
 ```powershell
 # 仮想環境を作成して実行
-python -m venv venv
-venv\Scripts\activate
-pip install PyPDF2 PySide6 pyinstaller
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
 pyinstaller --onefile --windowed --name "PdfBinder" pdfbinder.py
 ```
 
