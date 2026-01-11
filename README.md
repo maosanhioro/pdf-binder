@@ -182,6 +182,4 @@ python pdfbinder.py
 
 ---
 
-**開発者**: GitHub Copilot  
-**最終更新**: 2025年9月11日  
 **対応OS**: Windows 11 (推奨), Windows 10
