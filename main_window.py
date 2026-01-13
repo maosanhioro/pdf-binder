@@ -191,10 +191,26 @@ class MainWindow(QMainWindow):
     @Slot(list)
     def on_merge_files_changed(self, files):
         self.current_merge_files = files
+        # when user selects files for merging, set output dir to the first file's folder
+        if files:
+            try:
+                first_dir = os.path.dirname(files[0])
+                if first_dir:
+                    self.output_dir.setText(first_dir)
+            except Exception:
+                pass
 
     @Slot(str)
     def on_extract_file_selected(self, path):
         self.current_extract_file = path if path else None
+        # when a file is selected for extraction, set output dir to that file's folder
+        if path:
+            try:
+                d = os.path.dirname(path)
+                if d:
+                    self.output_dir.setText(d)
+            except Exception:
+                pass
 
     def on_choose_dir(self):
         d = QFileDialog.getExistingDirectory(self, "出力先を選択", os.getcwd())
