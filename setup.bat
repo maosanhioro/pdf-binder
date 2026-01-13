@@ -32,7 +32,9 @@ if exist ".venv\Scripts\python.exe" set PYTHON_EXE=.venv\Scripts\python.exe
 
 echo.
 echo 必要なライブラリをインストール中...
-%PYTHON_EXE% -m pip install -r requirements.txt >nul 2>&1
+echo.
+echo 必要なライブラリをインストールしています（出力を表示）...
+%PYTHON_EXE% -m pip install -r requirements.txt
 if %ERRORLEVEL% equ 0 (
     echo ! ライブラリのインストール完了
 ) else (
