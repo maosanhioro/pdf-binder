@@ -62,4 +62,4 @@ certs/*.pfx
 
 # PyInstaller spec
 PdfBinder.spec
-PdfBinder_PySide6.spec
+PdfBinder_pyinstaller.spec
