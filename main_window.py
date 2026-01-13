@@ -98,7 +98,8 @@ class MainWindow(QMainWindow):
         self.output_dir = QLineEdit(os.getcwd())
         self.output_dir.setMinimumHeight(36)
         self.output_dir.setStyleSheet("font-size:13px; padding:8px;")
-        self.output_dir.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        # prefer available space but avoid forcing parent widget to expand
+        self.output_dir.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         btn_browse = QPushButton("参照")
         btn_browse.setFixedWidth(72)
         btn_browse.setMinimumHeight(36)
@@ -156,8 +157,8 @@ class MainWindow(QMainWindow):
 
         right_widget = QWidget()
         right_widget.setLayout(action)
-        # limit right pane width to keep it no wider than the PDF list area
-        right_widget.setMaximumWidth(380)
+        # fix right pane width to keep it stable regardless of content
+        right_widget.setFixedWidth(380)
 
         root.addWidget(center_widget, 1)
         root.addWidget(right_widget, 0)
